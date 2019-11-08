@@ -24,6 +24,35 @@
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
         ctx.fillStyle = "blue";
+        function black2transparent(img) //https://stackoverflow.com/questions/6755314/canvas-imagedata-remove-white-pixels
+        {
+            var c = document.createElement('canvas');
+
+            var w = img.width, h = img.height;
+
+            c.width = w;
+            c.height = h;
+
+            var ctx = c.getContext('2d');
+
+            ctx.drawImage(img, 0, 0, w, h);
+            var imageData = ctx.getImageData(0,0, w, h);
+            var pixel = imageData.data;
+
+            var r=0, g=1, b=2,a=3;
+            for (var p = 0; p<pixel.length; p+=4)
+            {
+                if (
+                    pixel[p+r] === 0 &&
+                    pixel[p+g] === 0 &&
+                    pixel[p+b] === 0) // if black then change alpha to 0
+                {pixel[p+a] = 0;}
+            }
+
+            ctx.putImageData(imageData,0,0);
+
+            return c;
+        }
         union = function(set1,set2) {
             let result = new Set(set1);
             for (let element of set2) {
@@ -489,9 +518,169 @@
 
             let canvas4 = document.getElementById("canvas4");
             let ctx4 = canvas4.getContext("2d");
+            ctx4.clearRect(0,0,canvas4.width,canvas4.height);
             let midx = canvas4.width / 2;
             let midy = canvas4.height / 2;
             let radius = Math.min(midx,midy)*2/3;
+
+            var maskCanvas = document.createElement('canvas'); //https://stackoverflow.com/questions/6271419/how-to-fill-the-opposite-shape-on-canvas/
+            maskCanvas.width = canvas4.width;
+            maskCanvas.height = canvas4.height;
+            var maskCtx = maskCanvas.getContext('2d');
+
+            maskCtx.fillStyle = "black";
+            maskCtx.strokeStyle = "black";
+            maskCtx.globalCompositeOperation = 'xor';
+            let maskCanvas2 = document.createElement('canvas');
+            let maskCtx2 = maskCanvas2.getContext("2d");
+            maskCanvas2.width = canvas4.width;
+            maskCanvas2.height = canvas4.height;
+            for (let i = 1; i < Math.pow(2, hulkadearv); i++) {
+                maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
+                let binary = i.toString(2);
+                let uhekohad = [];
+                for (let j = 0; j < binary.length; j++) {
+                    if (binary[j] === "1") {
+                        uhekohad.push(binary.length - 1 - j);
+                    }
+                }
+                uhekohad.sort();
+                if (tulemus.has(i)) {
+                    maskCtx2.fillStyle = "blue";
+                } else {
+                    maskCtx2.fillStyle = "white";
+                }
+                if (uhekohad[0] === 0) {
+                    maskCtx2.beginPath();
+                    maskCtx2.rect(0,midy, maskCanvas2.width, midy);
+                    maskCtx2.fill();
+                    maskCtx2.stroke();
+                } else if (uhekohad[0] === 1) {
+                    maskCtx2.beginPath();
+                    maskCtx2.rect(midx,0, midx, midy*2);
+                    maskCtx2.fill();
+                    maskCtx2.stroke();
+                } else if (uhekohad[0] === 2) {
+                    maskCtx2.beginPath();
+                    maskCtx2.arc(midx,midy,radius,0,Math.PI*2);
+                    maskCtx2.fill();
+                    maskCtx2.stroke();
+                } else {
+                    let n = Math.pow(2,uhekohad[0] - 2);
+                    let dist = radius/(Math.cos(Math.PI/(n*2)));
+                    let lobeRadius = ((radius*Math.tan(Math.PI/(n*2))));
+                    maskCtx2.beginPath();
+                    let midxMask = maskCanvas.width/2;
+                    let midyMask = maskCanvas.height/2;
+                    for (let j = 0; j < 2*n; j++) {
+                        let heading = [0,0,0];
+                        heading[0] = Math.PI/n * (j>0? (j-1):(2*n-1));
+                        heading[1] = Math.PI/n * j;
+                        heading[2] = Math.PI/n * ((j+1)%(2*n));
+                        let x = [0,0,0];
+                        let y = [0,0,0];
+                        let counter = 0;
+                        for (let m = (j>0? (j-1):(2*n-1)); m !== (j+2)%(2*n); m=(m+1)%(2*n)) {
+                            if (m/n !== 0.5 && m/n !== 1.5) {
+                                x[counter] = dist/Math.sqrt(1+Math.pow(Math.tan(heading[counter]),2));
+                                x[counter] = (Math.abs(heading[counter]- Math.PI) < Math.PI/2? -1:1)*x[counter];
+                                y[counter] = x[counter]*Math.tan(heading[counter]);
+                            } else {
+                                x[counter] = 0;
+                                y[counter] = heading[counter] < Math.PI? dist:(-1*dist);
+                            }
+                            counter += 1;
+                        }
+                        let point1 = uhisosa([x[0]+midxMask,y[0]+midyMask],[x[1]+midxMask,y[1]+midyMask], lobeRadius);
+                        let point2 = uhisosa([x[1]+midxMask,y[1]+midyMask],[x[2]+midxMask,y[2]+midyMask], lobeRadius);
+                        let cosAlpha = 1 - Math.pow(distance(point1, point2), 2) / (2 * Math.pow(lobeRadius, 2));
+                        let alpha = Math.acos(cosAlpha);
+
+                        let cosStart = 1 - Math.pow(distance([x[1]+midxMask+lobeRadius,y[1]+midyMask], point1), 2) / (2 * Math.pow(lobeRadius, 2));
+                        let start = Math.acos(cosStart);
+                        if (point1[1] < y[1]+midyMask) {
+                            start = 2*Math.PI - start;
+                        }
+                        if (j%2 === 0) {
+                            maskCtx2.arc(midxMask+x[1],midyMask+y[1],lobeRadius,start,start-alpha);
+                        } else {
+                            maskCtx2.arc(midxMask+x[1],midyMask+y[1],lobeRadius,start,start-alpha,true);
+                        }
+                    }
+                    maskCtx2.fill();
+                    maskCtx2.stroke();
+                }
+                if (uhekohad.length > 1) {
+                    for (let i = 1; i < uhekohad.length; i++) {
+                        maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                        maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+                        if (uhekohad[i] === 1) {
+                            maskCtx.beginPath();
+                            maskCtx.rect(midx,0, midx, midy*2);
+                            maskCtx.fill();
+                            maskCtx.stroke();
+                        } else if (uhekohad[i] === 2) {
+                            maskCtx.beginPath();
+                            maskCtx.arc(midx, midy, radius, 0, Math.PI * 2);
+                            maskCtx.fill();
+                            maskCtx.stroke();
+                        }else {
+                            let n = Math.pow(2, uhekohad[i] - 2);
+                            let dist = radius / (Math.cos(Math.PI / (n * 2)));
+                            let lobeRadius = ((radius * Math.tan(Math.PI / (n * 2))));
+                            maskCtx.beginPath();
+                            let midxMask = maskCanvas.width / 2;
+                            let midyMask = maskCanvas.height / 2;
+                            for (let j = 0; j < 2 * n; j++) {
+                                let heading = [0, 0, 0];
+                                heading[0] = Math.PI / n * (j > 0 ? (j - 1) : (2 * n - 1));
+                                heading[1] = Math.PI / n * j;
+                                heading[2] = Math.PI / n * ((j + 1) % (2 * n));
+                                let x = [0, 0, 0];
+                                let y = [0, 0, 0];
+                                let counter = 0;
+                                for (let m = (j > 0 ? (j - 1) : (2 * n - 1)); m !== (j + 2) % (2 * n); m = (m + 1) % (2 * n)) {
+                                    if (m / n !== 0.5 && m / n !== 1.5) {
+                                        x[counter] = dist / Math.sqrt(1 + Math.pow(Math.tan(heading[counter]), 2));
+                                        x[counter] = (Math.abs(heading[counter] - Math.PI) < Math.PI / 2 ? -1 : 1) * x[counter];
+                                        y[counter] = x[counter] * Math.tan(heading[counter]);
+                                    } else {
+                                        x[counter] = 0;
+                                        y[counter] = heading[counter] < Math.PI ? dist : (-1 * dist);
+                                    }
+                                    counter += 1;
+                                }
+                                let point1 = uhisosa([x[0] + midxMask, y[0] + midyMask], [x[1] + midxMask, y[1] + midyMask], lobeRadius);
+                                let point2 = uhisosa([x[1] + midxMask, y[1] + midyMask], [x[2] + midxMask, y[2] + midyMask], lobeRadius);
+                                let cosAlpha = 1 - Math.pow(distance(point1, point2), 2) / (2 * Math.pow(lobeRadius, 2));
+                                let alpha = Math.acos(cosAlpha);
+
+                                let cosStart = 1 - Math.pow(distance([x[1] + midxMask + lobeRadius, y[1] + midyMask], point1), 2) / (2 * Math.pow(lobeRadius, 2));
+                                let start = Math.acos(cosStart);
+                                if (point1[1] < y[1] + midyMask) {
+                                    start = 2 * Math.PI - start;
+                                }
+                                if (j % 2 === 0) {
+                                    maskCtx.arc(midxMask + x[1], midyMask + y[1], lobeRadius, start, start - alpha);
+                                } else {
+                                    maskCtx.arc(midxMask + x[1], midyMask + y[1], lobeRadius, start, start - alpha, true);
+                                }
+                            }
+                            maskCtx.fill();
+                            maskCtx.stroke();
+                        }
+                        maskCtx2.drawImage(maskCanvas, 0, 0)
+                    }
+                }
+                ctx4.drawImage(black2transparent(maskCanvas2), 0, 0)
+                
+            }
+
+// Draw mask on the image, and done !
+
+
+
+
             for (let i = 0; i < hulkadearv; i++) {
                 if (i === 0) {
                     ctx4.moveTo(0,midy);
@@ -551,6 +740,7 @@
                     ctx4.stroke();
                 }
             }
+
         };
     </script>
 </body>
