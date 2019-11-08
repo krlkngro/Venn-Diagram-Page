@@ -24,7 +24,7 @@
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
         ctx.fillStyle = "blue";
-        function red2blueandyellow2white(img) //https://stackoverflow.com/questions/6755314/canvas-imagedata-remove-white-pixels
+        function black2transparent(img) //https://stackoverflow.com/questions/6755314/canvas-imagedata-remove-white-pixels
         {
             var c = document.createElement('canvas');
 
@@ -43,20 +43,10 @@
             for (var p = 0; p<pixel.length; p+=4)
             {
                 if (
-                    pixel[p+r] === 255 &&
+                    pixel[p+r] === 0 &&
                     pixel[p+g] === 0 &&
                     pixel[p+b] === 0) // if black then change alpha to 0
-                {
-                    pixel[p+r] = 0;
-                    pixel[p+g] = 0;
-                    pixel[p+b] = 255;
-                } else if (
-                    pixel[p+r] === 255 &&
-                    pixel[p+g] === 255 &&
-                    pixel[p+b] === 0
-                ) {
-                    pixel[p+b] = 255;
-                }
+                {pixel[p+a] = 0;}
             }
 
             ctx.putImageData(imageData,0,0);
@@ -538,14 +528,13 @@
             maskCanvas.height = canvas4.height;
             var maskCtx = maskCanvas.getContext('2d');
 
-            maskCtx.fillStyle = "yellow";
-            maskCtx.strokeStyle = "yellow";
+            maskCtx.fillStyle = "black";
+            maskCtx.strokeStyle = "black";
             maskCtx.globalCompositeOperation = 'xor';
             let maskCanvas2 = document.createElement('canvas');
             let maskCtx2 = maskCanvas2.getContext("2d");
             maskCanvas2.width = canvas4.width;
             maskCanvas2.height = canvas4.height;
-            ctx4.globalCompositeOperation = "multiply";
             for (let i = 1; i < Math.pow(2, hulkadearv); i++) {
                 maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
                 let binary = i.toString(2);
@@ -557,9 +546,9 @@
                 }
                 uhekohad.sort();
                 if (tulemus.has(i)) {
-                    maskCtx2.fillStyle = "red";
+                    maskCtx2.fillStyle = "blue";
                 } else {
-                    maskCtx2.fillStyle = "yellow";
+                    maskCtx2.fillStyle = "white";
                 }
                 if (uhekohad[0] === 0) {
                     maskCtx2.beginPath();
@@ -683,11 +672,10 @@
                         maskCtx2.drawImage(maskCanvas, 0, 0)
                     }
                 }
-                ctx4.drawImage(maskCanvas2, 0, 0);
+                ctx4.drawImage(black2transparent(maskCanvas2), 0, 0)
                 
             }
-            ctx4.globalCompositeOperation = "source-over";
-            ctx4.drawImage(red2blueandyellow2white(canvas4), 0, 0);
+
 // Draw mask on the image, and done !
 
 
