@@ -21,38 +21,6 @@
     <input id="equation" type="text">
     <button onclick="draw()">Joonista</button>
     <script>
-        var canvas = document.getElementById("canvas");
-        var ctx = canvas.getContext("2d");
-        ctx.fillStyle = "blue";
-        function black2transparent(img) //https://stackoverflow.com/questions/6755314/canvas-imagedata-remove-white-pixels
-        {
-            var c = document.createElement('canvas');
-
-            var w = img.width, h = img.height;
-
-            c.width = w;
-            c.height = h;
-
-            var ctx = c.getContext('2d');
-
-            ctx.drawImage(img, 0, 0, w, h);
-            var imageData = ctx.getImageData(0,0, w, h);
-            var pixel = imageData.data;
-
-            var r=0, g=1, b=2,a=3;
-            for (var p = 0; p<pixel.length; p+=4)
-            {
-                if (
-                    pixel[p+r] === 0 &&
-                    pixel[p+g] === 0 &&
-                    pixel[p+b] === 0) // if black then change alpha to 0
-                {pixel[p+a] = 0;}
-            }
-
-            ctx.putImageData(imageData,0,0);
-
-            return c;
-        }
         union = function(set1,set2) {
             let result = new Set(set1);
             for (let element of set2) {
@@ -96,7 +64,6 @@
                         valem = valem.slice(1);
                         counter += 1;
                     }
-                    continue;
                 } else if (valem[0] === "-") {
                     valem = valem.slice(1);
                     counter += 1;
@@ -210,23 +177,16 @@
             hulgad2["Universaalhulk"] = Array.from(Array(Math.pow(2, hulgad.length)).keys());
             return [teeTehe(valem, hulgad2), hulgad];
         };
-        circle = function(radius, startdeg, enddeg, xcenter, ycenter, color) {
-            ctx.beginPath();
-            ctx.arc(xcenter,ycenter,radius,startdeg*Math.PI/180,enddeg*Math.PI/180);
+        circle = function(radius, startdeg, enddeg, xcenter, ycenter, color, context) {
+            context.beginPath();
+            context.arc(xcenter,ycenter,radius,startdeg*Math.PI/180,enddeg*Math.PI/180);
             if(color) {
-                ctx.fillStyle = "blue";
+                context.fillStyle = "blue";
             } else {
-                ctx.fillStyle = "white";
+                context.fillStyle = "white";
             }
-            ctx.fill();
-            ctx.stroke();
-        };
-        factorial = function (num) {
-          if (num > 1) {
-              return factorial(num-1)*num;
-          } else {
-              return 1;
-          }
+            context.fill();
+            context.stroke();
         };
         distance = function(point1, point2) {
             return (Math.sqrt(Math.pow((point2[0]-point1[0]),2) + Math.pow((point2[1]-point1[1]),2)));
@@ -242,7 +202,112 @@
                 return [(P1[0]+P0[0])/2, (P1[1]+P0[1])/2]
             }
         };
+        drawLobe = function(currentSet, radius, midpoint, context, fill) {
+            context.beginPath();
+            if (currentSet === 1) {
+                context.rect(0,midpoint[1], midpoint[0]*2, midpoint[1]);
+            } else if (currentSet === 2) {
+                context.rect(midpoint[0],0, midpoint[0], midpoint[1]*2);
+            } else if (currentSet === 3) {
+                context.arc(midpoint[0],midpoint[1],radius,0,Math.PI*2);
+            } else {
+                let n = Math.pow(2, currentSet - 3);
+                let dist = radius / (Math.cos(Math.PI / (n * 2)));
+                let lobeRadius = ((radius * Math.tan(Math.PI / (n * 2))));
+                for (let j = 0; j < 2 * n; j++) {
+                    let heading = [0, 0, 0];
+                    heading[0] = Math.PI / n * (j > 0 ? (j - 1) : (2 * n - 1));
+                    heading[1] = Math.PI / n * j;
+                    heading[2] = Math.PI / n * ((j + 1) % (2 * n));
+                    let x = [0, 0, 0];
+                    let y = [0, 0, 0];
+                    let counter = 0;
+                    for (let m = (j > 0 ? (j - 1) : (2 * n - 1)); m !== (j + 2) % (2 * n); m = (m + 1) % (2 * n)) {
+                        if (m / n !== 0.5 && m / n !== 1.5) {
+                            x[counter] = dist / Math.sqrt(1 + Math.pow(Math.tan(heading[counter]), 2));
+                            x[counter] = (Math.abs(heading[counter] - Math.PI) < Math.PI / 2 ? -1 : 1) * x[counter];
+                            y[counter] = x[counter] * Math.tan(heading[counter]);
+                        } else {
+                            x[counter] = 0;
+                            y[counter] = heading[counter] < Math.PI ? dist : (-1 * dist);
+                        }
+                        counter += 1;
+                    }
+                    let point1 = uhisosa([x[0] + midpoint[0], y[0] + midpoint[1]], [x[1] + midpoint[0], y[1] + midpoint[1]], lobeRadius);
+                    let point2 = uhisosa([x[1] + midpoint[0], y[1] + midpoint[1]], [x[2] + midpoint[0], y[2] + midpoint[1]], lobeRadius);
+                    let cosAlpha = 1 - Math.pow(distance(point1, point2), 2) / (2 * Math.pow(lobeRadius, 2));
+                    let alpha = Math.acos(cosAlpha);
+                    let cosStart = 1 - Math.pow(distance([x[1] + midpoint[0] + lobeRadius, y[1] + midpoint[1]], point1), 2) / (2 * Math.pow(lobeRadius, 2));
+                    let start = Math.acos(cosStart);
+                    if (point1[1] < y[1] + midpoint[1]) {
+                        start = 2 * Math.PI - start;
+                    }
+                    if (j % 2 === 0) {
+                        context.arc(midpoint[0] + x[1], midpoint[1] + y[1], lobeRadius, start, start - alpha);
+                    } else {
+                        context.arc(midpoint[0] + x[1], midpoint[1] + y[1], lobeRadius, start, start - alpha, true);
+                    }
+                }
+            }
+            if (fill) {
+                context.fill();
+            }
+            context.stroke();
+        };
+        drawSineOrCosine = function(context, width, height, result, setAmount, includedAreas, choice, sine) {
+            context.clearRect(0, 0, width, height);
+            for (let i = 1; i < Math.pow(2, setAmount); i++) {
+                let binary = i.toString(2);
+                let uhekohad = [];
+                for (let j = 0; j < binary.length; j++) {
+                    if (binary[j] === "1") {
+                        uhekohad.push(binary.length - 1 - j);
+                    }
+                }
+                context.beginPath();
+                if (sine) {
+                    context.moveTo(0, height / 2);
+                } else {
+                    context.moveTo(0, height / 2 - (((height - 10) / 2) / Math.pow(2, i)) * Math.cos(0));
+                }
+                for (let x = 0; x < width; x++) {
+                    let miny = 0;
+                    for (let indeks of uhekohad) {
+                        let y = 0;
+                        if (sine) {
+                            y = (height) / 2 - (((height - 10) / 2) / Math.pow(2, indeks)) * Math.sin((x + 1) / ((width) / ((Math.pow(2, indeks) * 2 * Math.PI))));
+                        } else {
+                            y = (height) / 2 - (((height - 10) / 2) / Math.pow(2, indeks)) * Math.cos((x + 1) / ((width) / ((Math.pow(2, indeks) * Math.PI))));
+                        }
+                        if (y > miny) {
+                            miny = y;
+                        }
+                    }
+                    context.lineTo(x + 1, miny);
+                }
+                context.lineTo(width, height);
+                context.lineTo(0, height);
+                context.closePath();
+                if (result.has(i)) {
+                    context.fillStyle = "blue";
+                    if (!includedAreas.includes(i) && choice === 2) {
+                        context.fillStyle = "orangered";
+                    }
+                } else {
+                    context.fillStyle = "white";
+                }
+                if (!includedAreas.includes(i) && choice === 2) {
+                    context.strokeStyle = "firebrick";
+                } else {
+                    context.strokeStyle = "black";
+                }
+                context.fill();
+                context.stroke();
+            }
+        };
         draw = function() {
+            let canvas = document.getElementById("canvas");
+            let ctx = canvas.getContext("2d");
             let valik = parseInt(document.querySelector('input[name="choice"]:checked').value);
             let result = translateInput();
             if (result === false) {
@@ -266,9 +331,8 @@
                 for (let i = 1; i <= centers.length; i++) {
                     if (i === 1) {
                         for (let n = 0; n < (i === hulkadearv ? 1 : hulkadearv); n++) {
-                            circle(radius, 0, 360, centers[n][0], centers[n][1], tulemus.has(Math.pow(2, (n))));
+                            circle(radius, 0, 360, centers[n][0], centers[n][1], tulemus.has(Math.pow(2, (n))), ctx);
                             arvestatudkohad.push(Math.pow(2, n));
-                            //let letters = "ABCDEFGHIJKLMNOPQRSTUVWXY";
                             ctx.fillStyle = "black";
                             let fontSize = 15;
                             ctx.font = JSON.stringify(fontSize) + "px Arial";
@@ -386,25 +450,7 @@
                 canvas.style.visibility = "hidden";
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            //Draw a Venn diagram using the sine function
             let canvas2 = document.getElementById("canvas2");
             let ctx2 = canvas2.getContext("2d");
             if (tulemus.has(0)) {
@@ -414,53 +460,12 @@
             }
             if (valik > 0) {
                 canvas2.style.visibility = "visible";
-                ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-                for (let i = 1; i < Math.pow(2, hulkadearv); i++) {
-                    let binary = i.toString(2);
-                    let uhekohad = [];
-                    for (let j = 0; j < binary.length; j++) {
-                        if (binary[j] === "1") {
-                            uhekohad.push(binary.length - 1 - j);
-                        }
-                    }
-                    ctx2.beginPath();
-                    ctx2.moveTo(0, canvas2.height / 2 - (((canvas2.height-10) / 2) / Math.pow(2, i)) * Math.sin(0 / ((canvas2.width) / (Math.pow(2, i) * 2 * Math.PI))));
-                    for (let x = 0; x < canvas2.width; x++) {
-                        let miny = 0;
-                        for (let indeks of uhekohad) {
-                            let y = (canvas2.height) / 2 - (((canvas2.height-10) / 2) / Math.pow(2, indeks)) * Math.sin((x + 1) / ((canvas2.width) / ((Math.pow(2, indeks) * 2 * Math.PI))));
-                            if (y > miny) {
-                                miny = y;
-                            }
-                        }
-                        ctx2.lineTo(x + 1, miny);
-                    }
-                    ctx2.lineTo(canvas2.width, canvas2.height);
-                    ctx2.lineTo(0, canvas2.height);
-                    ctx2.closePath();
-                    if (tulemus.has(i)) {
-                        ctx2.fillStyle = "blue";
-                        if (!arvestatudkohad.includes(i) && valik === 2) {
-                            ctx2.fillStyle = "orangered";
-                        }
-                    } else {
-                        ctx2.fillStyle = "white";
-                    }
-                    if (!arvestatudkohad.includes(i) && valik === 2) {
-                        ctx2.strokeStyle = "firebrick";
-                    } else {
-                        ctx2.strokeStyle = "black";
-                    }
-                    ctx2.fill();
-                    ctx2.stroke();
-                }
+                drawSineOrCosine(ctx2,canvas2.width,canvas2.height,tulemus,hulkadearv,arvestatudkohad,valik,true);
             } else {
                 canvas2.style.visibility = "hidden";
             }
 
-
-
-
+            //Draw a Venn diagram using the cosine function
             let canvas3 = document.getElementById("canvas3");
             let ctx3 = canvas3.getContext("2d");
             if (tulemus.has(0)) {
@@ -470,52 +475,12 @@
             }
             if (valik > 0) {
                 canvas3.style.visibility = "visible";
-                ctx3.clearRect(0, 0, canvas3.width, canvas3.height);
-                for (let i = 1; i < Math.pow(2, hulkadearv); i++) {
-                    let binary = i.toString(2);
-                    let uhekohad = [];
-                    for (let j = 0; j < binary.length; j++) {
-                        if (binary[j] === "1") {
-                            uhekohad.push(binary.length - 1 - j);
-                        }
-                    }
-                    ctx3.beginPath();
-                    ctx3.moveTo(0, canvas3.height / 2 - (((canvas3.height-10) / 2) / Math.pow(2, i)) * Math.cos(0));
-                    for (let x = 0; x < canvas3.width; x++) {
-                        let miny = 0;
-                        for (let indeks of uhekohad) {
-                            let y = (canvas3.height) / 2 - (((canvas3.height-10) / 2) / Math.pow(2, indeks)) * Math.cos((x + 1) / ((canvas3.width) / ((Math.pow(2, indeks)  * Math.PI))));
-                            if (y > miny) {
-                                miny = y;
-                            }
-                        }
-                        ctx3.lineTo(x + 1, miny);
-                    }
-                    ctx3.lineTo(canvas3.width, canvas3.height);
-                    ctx3.lineTo(0, canvas3.height);
-                    ctx3.closePath();
-                    if (tulemus.has(i)) {
-                        ctx3.fillStyle = "blue";
-                        if (!arvestatudkohad.includes(i) && valik === 2) {
-                            ctx3.fillStyle = "orangered";
-                        }
-                    } else {
-                        ctx3.fillStyle = "white";
-                    }
-                    if (!arvestatudkohad.includes(i) && valik === 2) {
-                        ctx3.strokeStyle = "firebrick";
-                    } else {
-                        ctx3.strokeStyle = "black";
-                    }
-                    ctx3.fill();
-                    ctx3.stroke();
-                }
+                drawSineOrCosine(ctx3,canvas3.width,canvas3.height,tulemus,hulkadearv,arvestatudkohad,valik,false);
             } else {
                 canvas3.style.visibility = "hidden";
             }
 
-
-
+            //Draw an Edwards-Venn diagram
             let canvas4 = document.getElementById("canvas4");
             let ctx4 = canvas4.getContext("2d");
             ctx4.clearRect(0,0,canvas4.width,canvas4.height);
@@ -523,227 +488,59 @@
             let midy = canvas4.height / 2;
             let radius = Math.min(midx,midy)*2/3;
 
-            var maskCanvas = document.createElement('canvas'); //https://stackoverflow.com/questions/6271419/how-to-fill-the-opposite-shape-on-canvas/
+            let maskCanvas = document.createElement('canvas'); //https://stackoverflow.com/questions/6271419/how-to-fill-the-opposite-shape-on-canvas/
             maskCanvas.width = canvas4.width;
             maskCanvas.height = canvas4.height;
-            var maskCtx = maskCanvas.getContext('2d');
+            let maskCtx = maskCanvas.getContext('2d');
 
-            maskCtx.fillStyle = "black";
-            maskCtx.strokeStyle = "black";
+            maskCtx.fillStyle = "white";
+            maskCtx.strokeStyle = "white";
             maskCtx.globalCompositeOperation = 'xor';
             let maskCanvas2 = document.createElement('canvas');
             let maskCtx2 = maskCanvas2.getContext("2d");
             maskCanvas2.width = canvas4.width;
             maskCanvas2.height = canvas4.height;
-            for (let i = 1; i < Math.pow(2, hulkadearv); i++) {
+            if (tulemus.size > Math.pow(2, hulkadearv)/2) {
+                tulemus = difference(Array.from(Array(Math.pow(2, hulgad.length)).keys()), tulemus);
+                ctx4.fillStyle = "blue";
+                ctx4.fillRect(0,0,canvas4.width,canvas4.height);
+                maskCtx.fillStyle = "blue";
+                maskCtx.strokeStyle = "blue";
+                maskCtx2.fillStyle = "white";
+                ctx4.globalCompositeOperation = "lighten";
+            } else {
+                ctx4.globalCompositeOperation = "darken";
+                maskCtx2.fillStyle = "blue";
+            }
+            for (let i of tulemus) {
                 maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
                 let binary = i.toString(2);
-                let uhekohad = [];
-                for (let j = 0; j < binary.length; j++) {
-                    if (binary[j] === "1") {
-                        uhekohad.push(binary.length - 1 - j);
-                    }
+                let maxbinary = (Math.pow(2, hulkadearv)-1).toString(2);
+                if (maxbinary.length > binary.length) {
+                    binary = "0".repeat(maxbinary.length-binary.length) + binary;
                 }
-                uhekohad.sort();
-                if (tulemus.has(i)) {
-                    maskCtx2.fillStyle = "blue";
-                } else {
-                    maskCtx2.fillStyle = "white";
-                }
-                if (uhekohad[0] === 0) {
-                    maskCtx2.beginPath();
-                    maskCtx2.rect(0,midy, maskCanvas2.width, midy);
-                    maskCtx2.fill();
-                    maskCtx2.stroke();
-                } else if (uhekohad[0] === 1) {
-                    maskCtx2.beginPath();
-                    maskCtx2.rect(midx,0, midx, midy*2);
-                    maskCtx2.fill();
-                    maskCtx2.stroke();
-                } else if (uhekohad[0] === 2) {
-                    maskCtx2.beginPath();
-                    maskCtx2.arc(midx,midy,radius,0,Math.PI*2);
-                    maskCtx2.fill();
-                    maskCtx2.stroke();
-                } else {
-                    let n = Math.pow(2,uhekohad[0] - 2);
-                    let dist = radius/(Math.cos(Math.PI/(n*2)));
-                    let lobeRadius = ((radius*Math.tan(Math.PI/(n*2))));
-                    maskCtx2.beginPath();
-                    let midxMask = maskCanvas.width/2;
-                    let midyMask = maskCanvas.height/2;
-                    for (let j = 0; j < 2*n; j++) {
-                        let heading = [0,0,0];
-                        heading[0] = Math.PI/n * (j>0? (j-1):(2*n-1));
-                        heading[1] = Math.PI/n * j;
-                        heading[2] = Math.PI/n * ((j+1)%(2*n));
-                        let x = [0,0,0];
-                        let y = [0,0,0];
-                        let counter = 0;
-                        for (let m = (j>0? (j-1):(2*n-1)); m !== (j+2)%(2*n); m=(m+1)%(2*n)) {
-                            if (m/n !== 0.5 && m/n !== 1.5) {
-                                x[counter] = dist/Math.sqrt(1+Math.pow(Math.tan(heading[counter]),2));
-                                x[counter] = (Math.abs(heading[counter]- Math.PI) < Math.PI/2? -1:1)*x[counter];
-                                y[counter] = x[counter]*Math.tan(heading[counter]);
-                            } else {
-                                x[counter] = 0;
-                                y[counter] = heading[counter] < Math.PI? dist:(-1*dist);
-                            }
-                            counter += 1;
-                        }
-                        let point1 = uhisosa([x[0]+midxMask,y[0]+midyMask],[x[1]+midxMask,y[1]+midyMask], lobeRadius);
-                        let point2 = uhisosa([x[1]+midxMask,y[1]+midyMask],[x[2]+midxMask,y[2]+midyMask], lobeRadius);
-                        let cosAlpha = 1 - Math.pow(distance(point1, point2), 2) / (2 * Math.pow(lobeRadius, 2));
-                        let alpha = Math.acos(cosAlpha);
-
-                        let cosStart = 1 - Math.pow(distance([x[1]+midxMask+lobeRadius,y[1]+midyMask], point1), 2) / (2 * Math.pow(lobeRadius, 2));
-                        let start = Math.acos(cosStart);
-                        if (point1[1] < y[1]+midyMask) {
-                            start = 2*Math.PI - start;
-                        }
-                        if (j%2 === 0) {
-                            maskCtx2.arc(midxMask+x[1],midyMask+y[1],lobeRadius,start,start-alpha);
-                        } else {
-                            maskCtx2.arc(midxMask+x[1],midyMask+y[1],lobeRadius,start,start-alpha,true);
-                        }
-                    }
-                    maskCtx2.fill();
-                    maskCtx2.stroke();
-                }
-                if (uhekohad.length > 1) {
-                    for (let i = 1; i < uhekohad.length; i++) {
-                        maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-                        maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                        if (uhekohad[i] === 1) {
-                            maskCtx.beginPath();
-                            maskCtx.rect(midx,0, midx, midy*2);
-                            maskCtx.fill();
-                            maskCtx.stroke();
-                        } else if (uhekohad[i] === 2) {
-                            maskCtx.beginPath();
-                            maskCtx.arc(midx, midy, radius, 0, Math.PI * 2);
-                            maskCtx.fill();
-                            maskCtx.stroke();
-                        }else {
-                            let n = Math.pow(2, uhekohad[i] - 2);
-                            let dist = radius / (Math.cos(Math.PI / (n * 2)));
-                            let lobeRadius = ((radius * Math.tan(Math.PI / (n * 2))));
-                            maskCtx.beginPath();
-                            let midxMask = maskCanvas.width / 2;
-                            let midyMask = maskCanvas.height / 2;
-                            for (let j = 0; j < 2 * n; j++) {
-                                let heading = [0, 0, 0];
-                                heading[0] = Math.PI / n * (j > 0 ? (j - 1) : (2 * n - 1));
-                                heading[1] = Math.PI / n * j;
-                                heading[2] = Math.PI / n * ((j + 1) % (2 * n));
-                                let x = [0, 0, 0];
-                                let y = [0, 0, 0];
-                                let counter = 0;
-                                for (let m = (j > 0 ? (j - 1) : (2 * n - 1)); m !== (j + 2) % (2 * n); m = (m + 1) % (2 * n)) {
-                                    if (m / n !== 0.5 && m / n !== 1.5) {
-                                        x[counter] = dist / Math.sqrt(1 + Math.pow(Math.tan(heading[counter]), 2));
-                                        x[counter] = (Math.abs(heading[counter] - Math.PI) < Math.PI / 2 ? -1 : 1) * x[counter];
-                                        y[counter] = x[counter] * Math.tan(heading[counter]);
-                                    } else {
-                                        x[counter] = 0;
-                                        y[counter] = heading[counter] < Math.PI ? dist : (-1 * dist);
-                                    }
-                                    counter += 1;
-                                }
-                                let point1 = uhisosa([x[0] + midxMask, y[0] + midyMask], [x[1] + midxMask, y[1] + midyMask], lobeRadius);
-                                let point2 = uhisosa([x[1] + midxMask, y[1] + midyMask], [x[2] + midxMask, y[2] + midyMask], lobeRadius);
-                                let cosAlpha = 1 - Math.pow(distance(point1, point2), 2) / (2 * Math.pow(lobeRadius, 2));
-                                let alpha = Math.acos(cosAlpha);
-
-                                let cosStart = 1 - Math.pow(distance([x[1] + midxMask + lobeRadius, y[1] + midyMask], point1), 2) / (2 * Math.pow(lobeRadius, 2));
-                                let start = Math.acos(cosStart);
-                                if (point1[1] < y[1] + midyMask) {
-                                    start = 2 * Math.PI - start;
-                                }
-                                if (j % 2 === 0) {
-                                    maskCtx.arc(midxMask + x[1], midyMask + y[1], lobeRadius, start, start - alpha);
-                                } else {
-                                    maskCtx.arc(midxMask + x[1], midyMask + y[1], lobeRadius, start, start - alpha, true);
-                                }
-                            }
-                            maskCtx.fill();
-                            maskCtx.stroke();
-                        }
-                        maskCtx2.drawImage(maskCanvas, 0, 0)
-                    }
-                }
-                ctx4.drawImage(black2transparent(maskCanvas2), 0, 0)
-                
-            }
-
-// Draw mask on the image, and done !
-
-
-
-
-            for (let i = 0; i < hulkadearv; i++) {
+                let one = binary.indexOf("1");
                 if (i === 0) {
-                    ctx4.moveTo(0,midy);
-                    ctx4.beginPath();
-                    ctx4.rect(0,midy, midx*2, midy);
-                    ctx4.stroke();
-                } else if (i === 1) {
-                    ctx4.moveTo(midx,0);
-                    ctx4.beginPath();
-                    ctx4.rect(midx,0, midx, midy*2);
-                    ctx4.stroke();
-                } else if (i === 2) {
-                    ctx4.moveTo(midx,midy);
-                    ctx4.beginPath();
-                    ctx4.arc(midx,midy,radius,0,Math.PI*2);
-                    ctx4.stroke();
+                    maskCtx2.fillRect(0,0,maskCanvas2.width, maskCanvas2.height);
                 } else {
-                    let n = Math.pow(2,i-2);
-                    let dist = radius/(Math.cos(Math.PI/(n*2)));
-                    let lobeRadius = ((radius*Math.tan(Math.PI/(n*2))));
-                    ctx4.beginPath();
-                    for (let j = 0; j < 2*n; j++) {
-                        let heading = [0,0,0];
-                        heading[0] = Math.PI/n * (j>0? (j-1):(2*n-1));
-                        heading[1] = Math.PI/n * j;
-                        heading[2] = Math.PI/n * ((j+1)%(2*n));
-                        let x = [0,0,0];
-                        let y = [0,0,0];
-                        let counter = 0;
-                        for (let m = (j>0? (j-1):(2*n-1)); m !== (j+2)%(2*n); m=(m+1)%(2*n)) {
-                            if (m/n !== 0.5 && m/n !== 1.5) {
-                                x[counter] = dist/Math.sqrt(1+Math.pow(Math.tan(heading[counter]),2));
-                                x[counter] = (Math.abs(heading[counter]- Math.PI) < Math.PI/2? -1:1)*x[counter];
-                                y[counter] = x[counter]*Math.tan(heading[counter]);
-                            } else {
-                                x[counter] = 0;
-                                y[counter] = heading[counter] < Math.PI? dist:(-1*dist);
-                            }
-                            counter += 1;
-                        }
-                        let point1 = uhisosa([x[0]+midx,y[0]+midy],[x[1]+midx,y[1]+midy], lobeRadius);
-                        let point2 = uhisosa([x[1]+midx,y[1]+midy],[x[2]+midx,y[2]+midy], lobeRadius);
-                        let cosAlpha = 1 - Math.pow(distance(point1, point2), 2) / (2 * Math.pow(lobeRadius, 2));
-                        let alpha = Math.acos(cosAlpha);
-
-                        let cosStart = 1 - Math.pow(distance([x[1]+midx+lobeRadius,y[1]+midy], point1), 2) / (2 * Math.pow(lobeRadius, 2));
-                        let start = Math.acos(cosStart);
-                        if (point1[1] < y[1]+midy) {
-                            start = 2*Math.PI - start;
-                        }
-                        if (j%2 === 0) {
-                            ctx4.arc(midx+x[1],midy+y[1],lobeRadius,start,start-alpha);
-                        } else {
-                            ctx4.arc(midx+x[1],midy+y[1],lobeRadius,start,start-alpha,true);
-                        }
-                    }
-                    ctx4.stroke();
+                    drawLobe(binary.length-one,radius,[maskCanvas2.width/2,maskCanvas2.height/2],maskCtx2, true);
                 }
+                for (let k = 0; k <= binary.length; k++) {
+                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+                    if (binary[k] === "1") {
+                        maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+                    }
+                    drawLobe(binary.length-k,radius,[maskCanvas.width/2,maskCanvas.height/2],maskCtx, true);
+                    maskCtx2.drawImage(maskCanvas, 0, 0)
+                }
+                ctx4.drawImage(maskCanvas2, 0, 0);
             }
+            ctx4.globalCompositeOperation = "source-over";
 
+            for (let i = 1; i <= hulkadearv; i++) {
+                drawLobe(i,radius,[canvas4.width/2,canvas4.height/2],ctx4, false);
+            }
         };
     </script>
 </body>
-
-
 </html>
