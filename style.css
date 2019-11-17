@@ -21,7 +21,7 @@ body{
 #top{
     margin: auto;
     width: 75%;
-    border: 3px solid black;
+    /*border: 1px solid black;*/
     background-color: white;
     padding: 15px;
 }
@@ -80,4 +80,30 @@ footer{
     padding-bottom: 5px;
     background-color: white;
     text-align: center;
+}
+
+#options{
+    margin-top: 20px;
+    margin-right: 15px;
+    margin-bottom: 15px;
+}
+/*
+#input button{
+    width: 100px;
+    height: 25px;
+}
+#input input{
+    width: 250px;
+    height: 21px;
+}
+*/
+
+.diagram{
+    /*border:1px solid #c3c3c3;
+    background-color: white;
+    */
+
+}
+#diagrams{
+    margin-top: 10px;
 }

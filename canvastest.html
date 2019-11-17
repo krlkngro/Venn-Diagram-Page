@@ -1,26 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Generaator</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+
 
 </head>
     <body>
-        <canvas id="canvas" width="600" height="300" style="border:1px solid #c3c3c3;">
-        </canvas>
-        <canvas id="canvas2" width="600" height="300" style="border:1px solid #c3c3c3;">
-        </canvas>
-        <canvas id="canvas3" width="600" height="300" style="border:1px solid #c3c3c3;">
-        </canvas>
-        <canvas id="canvas4" width="600" height="300" style="border:1px solid #c3c3c3;">
-        </canvas>
-        <div>
-            <input type="radio" name="choice" value="0"> Ainult ringid <br>
-            <input type="radio" name="choice" value="1"> Ainult Venni diagramm <br>
-            <input type="radio" name="choice" value="2"> Võrdle
+        <div id="top">
+
+            <a href="index.html"><img src="img/logo.png" alt="Logo"></a>
+
+            <ul>
+                <li><a href="index.html">Avaleht</a></li>
+                <li><a href="canvastest.html">Generaator</a></li>
+                <li><a href="instructions.html">Kasutusjuhis</a></li>
+                <li><a href="about.html">Meist</a></li>
+            </ul>
+            <div class="remove_float"></div>
         </div>
-        <input id="equation" type="text">
-        <button onclick="draw()">Joonista</button>
-        <script src="engine.js"></script>
+        <div class="container">
+
+            <h1>Venni diagrammide generaator</h1>
+
+            <div id="options">
+                <input type="radio" name="choice" value="0"> Ainult ringid
+                <input type="radio" name="choice" value="1"> Ainult Venni diagramm
+                <input type="radio" name="choice" value="2"> Võrdle
+            </div>
+
+            <div id="input">
+                <input id="equation" type="text">
+                <button onclick="draw()">Joonista</button>
+            </div>
+
+            <div id="diagrams">
+                <canvas class="diagram" id="canvas" width="600" height="300">
+                </canvas>
+                <canvas class="diagram" id="canvas2" width="600" height="300">
+                </canvas>
+                <canvas class="diagram" id="canvas3" width="600" height="300">
+                </canvas>
+                <canvas class="diagram" id="canvas4" width="600" height="300">
+                </canvas>
+            </div>
+
+            <script src="engine.js"></script>
+
+        </div>
+
     </body>
 </html>
