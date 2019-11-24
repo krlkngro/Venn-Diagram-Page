@@ -14,6 +14,7 @@ body{
 
     background-image: url("img/background.jpg");
     background-position: center center;
+    background-size: 100%;
     font-family: Verdana, Gabriola, sans-serif;
 
 }
@@ -48,6 +49,7 @@ body{
     color: white;
     margin: auto;
     margin-top: 40px;
+    margin-bottom: 40px;
     width: 75%;
 
 }
@@ -58,20 +60,36 @@ body{
     margin-bottom: 5px;
 
 }
+.container h2{
+    margin-top: 20px;
+    font-size: 20px;
+}
 .container p{
     padding-top: 15px;
+    text-align: justify;
+
+}
+.container ul{
+    margin-top: 15px;
+    margin-left: 50px;
+}
+.container li{
+    margin-bottom: 10px;
+    text-align: justify;
 }
 #three_circles{
     float: right;
     margin-right: 50px;
     margin-left: 15px;
 }
-#four_circles{
-    background-color: white;
+#three_circles figcaption{
+    margin-left: 200px;
+}
+#four_diagram{
     float: left;
     margin-right: 15px;
     margin-top: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 }
 footer{
     color: black;
@@ -106,4 +124,8 @@ footer{
 }
 #diagrams{
     margin-top: 10px;
+}
+figcaption{
+    font-size: 14px;
+    margin-bottom: 5px;
 }

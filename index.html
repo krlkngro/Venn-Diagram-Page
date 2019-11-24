@@ -21,23 +21,58 @@
     </div>
     <div class="container">
         <h1>Mis on Venni diagramm?</h1>
-        <img id="three_circles" src="img/3C.png" alt="Kolm ringi">
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
+        <figure id="three_circles">
+            <p><img src="img/3C.png" alt="Kolm ringi"></p>
+            <figcaption>Joonis 1</figcaption>
+        </figure>
+
+        <p>
+            Venni diagramm, nimetatud briti loogiku John Venni järgi, on vahend hulgateoreetiliste tehete ning lausearvutuse vahendite visualiseerimiseks.
+        </p>
+        <p>
+            Diagrammi eesmärgiks on kujutada kõikvõimalikke loogilisi suhteid lõpliku arvu hulkade vahel. Selleks mõeldakse hulkadest, kui mingitest suletud pindadest,
+            ning hulkade elementidest, kui punktidest neil pindadel. Seades pinnad selliselt, et need omavahel kõikvõimalikel viisidel kattuvad, saamegi Venni diagrammi.
+        </p>
+        <p>
+            Klassikaline Venni diagrammi näide koosneb üksteisega kattuvatest ringidest, nagu on näha joonisel 1. Antud juhul on kujutatud
+            kolme hulka A, B, C ning nendevahelisi loogilisi seoseid, millest mõned on värviga välja toodud.
+            Kollasega värvitud ala kujutab kõiki neid elemente, mis kuuluvad korraga kõikidesse neisse hulkadesse. Sinine ala tähistab neid elemente, mis kuuluvad
+            ainult hulka C, roheline elemente, mis kuuluvad hulka A, aga ei kuulu hulka B ja punane elemente, mis kuuluvad hulkadesse B ja C, aga ei kuulu hulka A.
+        </p>
+        <p>
+            Venni diagrammid leiavad laialdast kasutust hulgateooria õpetamisel ning andmete visualiseerimisel paljudes valdkondades.
+        </p>
 
         <div class="remove_float"></div>
         <h1>Mis ei ole Venni diagramm?</h1>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <img id="four_circles" src="img/4C.png" alt="Neli ringi">
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consectetur ea eaque earum eum maxime, nam nihil obcaecati! Atque cum cumque harum officia pariatur perspiciatis sapiente sit. Consectetur fugiat quibusdam veritatis.</p>
+
+        <figure id="four_diagram">
+            <p><img src="img/4C.png" alt="Neli ringi"></p>
+            <figcaption>Joonis 2</figcaption>
+            <p><img src="img/4ellipse.png" alt="Neli ellipsit"></p>
+            <figcaption>Joonis 3</figcaption>
+        </figure>
+        <p>
+            Vaatleme olukorda, kus meil on vaja kujutada eelmises näites toodud kolme hulga asemel nelja hulka. Intuitiivselt võiks joonistada sellise diagrammi,
+            nagu on näha teisel joonisel. Enamikul juhtudel paistab selline diagram toimivat, kuid kui sooviksime kujutada seda ala, mis on eelmisel joonisel punasega
+            tähistatud (ehk elemente, mis kuuluvad hulkadesse B ja C ning ei kuhugi mujale), tekib probleem, sest sellist ala diagrammil ei
+            leidu.
+        </p>
+        <p>
+            Seega vaadeldav diagramm ei ole Venni diagramm, sest see ei kujuta kõikvõimalikke loogilisi suhteid. Üheks lahenduseks tekkinud olukorrale on kasutada
+            ringide asemel näiteks ellipseid ning paigutada need nii, nagu on näha joonisel 3. Ringide puhul puuduv ala on tähistatud punasega.
+        </p>
+        <p>
+            Joonisel 2 nähtavat diagrammi nimetatakse Euleri diagrammiks. Euleri diagrammid on Venni diagrammidega väga sarnased: mõlema eesmärgiks
+            on kujutada hulki ning nendevahelisi suhteid, kuid Euleri diagrammide puhul ei pruugi olla kujutatud kõikvõimalikud olukorrad. Venni diagrammid
+            on Euleri diagrammide rangem erijuht.
+        </p>
+        <p>
+            Euleri diagrammide puhul on oluline, et kujutatud saaksid need olukorrad, mis on relevantsed.
+            Ehk teisisõnu, kui näiteks joonisel 3 punasega märgitud piirkond pole oluline, siis sobib kasutamiseks ka Euleri diagramm, mida on
+            (eriti rohkemate hulkade puhul) palju lihtsam joonistada kui Venni diagrammi.
+        </p>
+
 
         <div class="remove_float"></div>
 
