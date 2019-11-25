@@ -46,12 +46,7 @@
         <div class="remove_float"></div>
         <h1>Mis ei ole Venni diagramm?</h1>
 
-        <figure id="four_diagram">
-            <p><img src="img/4C.png" alt="Neli ringi"></p>
-            <figcaption>Joonis 2</figcaption>
-            <p><img src="img/4ellipse.png" alt="Neli ellipsit"></p>
-            <figcaption>Joonis 3</figcaption>
-        </figure>
+
         <p>
             Vaatleme olukorda, kus meil on vaja kujutada eelmises näites toodud kolme hulga asemel nelja hulka. Intuitiivselt võiks joonistada sellise diagrammi,
             nagu on näha teisel joonisel. Enamikul juhtudel paistab selline diagram toimivat, kuid kui sooviksime kujutada seda ala, mis on eelmisel joonisel punasega
@@ -62,20 +57,71 @@
             Seega vaadeldav diagramm ei ole Venni diagramm, sest see ei kujuta kõikvõimalikke loogilisi suhteid. Üheks lahenduseks tekkinud olukorrale on kasutada
             ringide asemel näiteks ellipseid ning paigutada need nii, nagu on näha joonisel 3. Ringide puhul puuduv ala on tähistatud punasega.
         </p>
-        <p>
-            Joonisel 2 nähtavat diagrammi nimetatakse Euleri diagrammiks. Euleri diagrammid on Venni diagrammidega väga sarnased: mõlema eesmärgiks
-            on kujutada hulki ning nendevahelisi suhteid, kuid Euleri diagrammide puhul ei pruugi olla kujutatud kõikvõimalikud olukorrad. Venni diagrammid
-            on Euleri diagrammide rangem erijuht.
-        </p>
-        <p>
-            Euleri diagrammide puhul on oluline, et kujutatud saaksid need olukorrad, mis on relevantsed.
-            Ehk teisisõnu, kui näiteks joonisel 3 punasega märgitud piirkond pole oluline, siis sobib kasutamiseks ka Euleri diagramm, mida on
-            (eriti rohkemate hulkade puhul) palju lihtsam joonistada kui Venni diagrammi.
-        </p>
+        <div id="four_sets">
+            <figure id="four_circles">
+                <p><img src="img/4C.png" alt="Neli ringi"></p>
+                <figcaption>Joonis 2</figcaption>
 
-
+            </figure>
+            <figure id="ellipses">
+                <p><img src="img/4ellipse.png" alt="Neli ellipsit"></p>
+                <figcaption>Joonis 3</figcaption>
+            </figure>
+        </div>
         <div class="remove_float"></div>
+        <h1>Edwardsi-Venni diagrammid</h1>
+        <p>
+            Kui on soov kujutada korraga veel suuremat arvu hulki, siis on otstarbekas
+            läheneda ülesandele süsteemsemalt. Ühe võimaliku lahenduse pakkus välja
+            Anthony William Fairbank Edwards, kelle ideeks oli joonistada Venni diagramme
+            kasutades kera pinnalaotuse segmentide abi.
+        </p>
+        <p>
+            Näiteks kuue hulga puhul näeb Edwardsi-Venni diagramm välja selline, nagu on
+            näha joonisel 4. Diagrammi alumine pool kujutab esimest hulka, parem pool teist hulka
+            ning edasised hulgad saab kujutada joonistades peale kõveraid kera pinna segmente.
+            Nii tähistab kolmandat hulka diagrammi keskel olev ring, neljas hulk meenutab tennisepallil
+            olevat kõverjoont ning edaspidised hulgad näevad välja nagu järjest kitsamaks
+            minevad hammasrattad diagrammi keskel. Taoline lähenemine kujutab ära kõikvõimalikud hulkadevahelised suhted.
+        </p>
+        <p>
+            Näiteks on joonisel 4 sinisena kujutatud kõigi kuue hulga ühisosa, rohelisena kuuenda hulga elemendid, mis kuhugi mujale ei kuulu,
+            ja kollasena elemendid, mis kuuluvad ainult teise ja neljanda hulga ühisosasse ja ei kuhugi mujale.
+            Joontega piiramata ala, mis jääb vasakusse ülemisse nurka tähistab elemente, mis ei kuulu ühtegi hulka.
+        </p>
+        <figure id="edwards">
+            <p><img src="img/Edwards.png" alt="Edwardsi-Venni diagramm"></p>
+            <figcaption>Joonis 4. Edwardsi-Venni diagramm</figcaption>
+        </figure>
+        <h1>Sinusoidsed Venni diagrammid</h1>
+        <p>
+            Veel üks võimalus kujutada korraga suurt arvu hulki on kasutada siinuse või koosinuse graafikut.
+            Sellisel juhul näevad diagrammid kuue hulga puhul välja, nagu on kujutatud vastavalt joonistel 5 ja 6.
 
+        </p>
+        <p>
+            Põhimõte on üsnagi lihtne: igale hulgale vastab oma graafik, nii et
+            esimesel hulgal on joone amplituud ja periood kõige suurem, ning mida hulk edasi,
+            seda väiksemaks graafiku amplituud ja periood muutuvad. Need elemendid, mis hulka kuuluvad,
+            asuvad selle hulga graafiku joonest allpool ja need, mis hulka ei kuulu, ülalpool.
+        </p>
+        <p>
+            Toome Edwardsi-Venni diagrammi puhul esitatud näited ka sinusoidsete diagrammide
+            puhul välja: Sinisega on värvitud kõigi kuue hulga ühisosa, kollasega elemendid, mis
+            kuuluvad ainult teise ja neljanda hulga ühisosasse ning ei kuhugi mujale ja roheline
+            märgib elemente, mis kuuluvad ainult kuuendasse hulka.
+        </p>
+        <div id="sincos">
+            <figure id="sine">
+                <p><img src="img/sine.png" alt="Siinus"></p>
+                <figcaption>Joonis 5. Siinus</figcaption>
+            </figure>
+            <figure id="cosine">
+                <p><img src="img/cosine.png" alt="Koosinus"></p>
+                <figcaption>Joonis 6. Koosinus</figcaption>
+            </figure>
+        </div>
+        <div class="remove_float"></div>
     </div>
 
     <footer>&copy; Andre Anijärv, Kaarel Kangro</footer>

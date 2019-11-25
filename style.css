@@ -81,15 +81,41 @@ body{
     float: right;
     margin-right: 50px;
     margin-left: 15px;
+
 }
 #three_circles figcaption{
     margin-left: 200px;
 }
-#four_diagram{
+#four_circles{
     float: left;
-    margin-right: 15px;
-    margin-top: 15px;
-    margin-bottom: 5px;
+    margin-right: 20px;
+}
+#ellipses figcaption{
+    margin-top: 44px;
+}
+#four_sets{
+    width: 470px;
+    margin: auto;
+    margin-top: 20px;
+}
+#edwards{
+    width: 500px;
+    margin: auto;
+}
+#sine{
+    float: left;
+    margin-right: 25px;
+}
+
+#sincos{
+    margin-top: 20px;
+    /*display: flex;
+    justify-content: center;
+    align-items: center;*/
+
+}
+#sincos img{
+    border:1px solid white;
 }
 footer{
     color: black;
@@ -127,5 +153,6 @@ footer{
 }
 figcaption{
     font-size: 14px;
+    margin-top: 5px;
     margin-bottom: 5px;
 }
