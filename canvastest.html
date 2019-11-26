@@ -25,25 +25,35 @@
             <h1>Venni diagrammide generaator</h1>
 
             <div id="options">
-                <input type="radio" name="choice" value="0"> Ainult ringid
-                <input type="radio" name="choice" value="1"> Ainult Venni diagramm
-                <input type="radio" name="choice" value="2"> Võrdle
+                <label>
+                    <input type="radio" name="choice" value="0">
+                </label> Ainult ringid
+                <label>
+                    <input type="radio" name="choice" value="1">
+                </label> Ainult Venni diagramm
+                <label>
+                    <input type="radio" name="choice" value="2">
+                </label> Võrdle
             </div>
 
             <div id="input">
-                <input id="equation" type="text">
+                <label for="equation"></label><input id="equation" type="text">
                 <button onclick="draw()">Joonista</button>
             </div>
 
             <div id="diagrams">
+
+                <canvas class="diagram" id="canvas4" width="600" height="300">
+                </canvas>
                 <canvas class="diagram" id="canvas" width="600" height="300">
                 </canvas>
+
+
                 <canvas class="diagram" id="canvas2" width="600" height="300">
                 </canvas>
                 <canvas class="diagram" id="canvas3" width="600" height="300">
                 </canvas>
-                <canvas class="diagram" id="canvas4" width="600" height="300">
-                </canvas>
+
             </div>
 
             <script src="engine.js"></script>

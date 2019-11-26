@@ -22,7 +22,6 @@ body{
 #top{
     margin: auto;
     width: 75%;
-    /*border: 1px solid black;*/
     background-color: white;
     padding: 15px;
 }
@@ -86,33 +85,25 @@ body{
 #three_circles figcaption{
     margin-left: 200px;
 }
-#four_circles{
-    float: left;
-    margin-right: 20px;
-}
-#ellipses figcaption{
-    margin-top: 44px;
+
+#ellipses{
+    margin-top: 38px;
 }
 #four_sets{
-    width: 470px;
-    margin: auto;
-    margin-top: 20px;
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
 }
+
 #edwards{
     width: 500px;
     margin: auto;
 }
-#sine{
-    float: left;
-    margin-right: 25px;
-}
-
 #sincos{
     margin-top: 20px;
-    /*display: flex;
-    justify-content: center;
-    align-items: center;*/
-
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
 }
 #sincos img{
     border:1px solid white;
@@ -143,13 +134,15 @@ footer{
 */
 
 .diagram{
-    /*border:1px solid #c3c3c3;
-    background-color: white;
-    */
-
+    flex-basis: 49%;
+    margin-top: 1%;
+    margin-right: 1%;
 }
 #diagrams{
-    margin-top: 10px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
 }
 figcaption{
     font-size: 14px;
