@@ -1,0 +1,37 @@
+#three_circles{
+    float: right;
+    margin-right: 50px;
+    margin-left: 15px;
+
+}
+#three_circles figcaption{
+    margin-left: 200px;
+}
+
+#ellipses{
+    margin-top: 38px;
+}
+#four_sets{
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+#edwards{
+    width: 500px;
+    margin: auto;
+}
+#sincos{
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+#sincos img{
+    border:1px solid white;
+}
+figcaption{
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
