@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <title>Kasutusjuhis</title>
         <link rel="stylesheet" type="text/css" href="style.css">
-
+        <link rel="stylesheet" type="text/css" href="instructions_page.css">
     </head>
     <body>
         <div id="top">
@@ -34,7 +34,7 @@
 
             <h2>Sisestamine</h2>
             <p>
-                Valemi sisestamisel tuleb lähtuda hulgateoreetiliste tehete kirjutamise tavapärastest reeglitest. Vajadusel kasutada sulge.<br>
+                Valem tuleb sisestada vasakpoolsesse kasti, lähtudes hulgateoreetiliste tehete kirjutamise tavapärastest reeglitest. Vajadusel kasutada sulge.<br>
                 Diagrammidel kuvatakse hulgad tähestikulises järjekorras hulgatähiste järgi. Näiteks hulk E paistab sinusoidsetel ja Edwardsi diagrammidel suurema alana/joonena
                 kui hulk M.
             </p>
@@ -55,6 +55,31 @@
                 <li>" A&B " - Hulkade A ja B ühisosa</li>
                 <li>" (A|B)' " - Hulkade A ja B ühendi täiend</li>
                 <li>" (A^B)-C " - Hulkade A ja B sümmeetrilise vahe ja hulga C vahe</li>
+            </ul>
+
+            <p>
+                Teine kast võimaldab keerulisemate hulgaavaldiste puhul tuua diagrammile selgust,
+                lastes eraldi välja joonistada sinna sisestatud hulga. Kui teist kasti kasutada, lisanduvad
+                joonistele roheline, helesinine ja kollane värv (tähendus allpool).
+            </p>
+            <p>
+                Näiteks, kui on soov eristada hulk A, siis tulekski teise kasti sisestada "A". Kui on
+                vaja välja tuua hulkades A ja B olevad elemendid, siis sisestada "AB"
+            </p>
+            <h2>Värvide tähendus diagrammidel</h2>
+            <ul>
+                <li><span class="sinine">Sinine</span>: Tähistab neid alasid, kus on sisestatud hulga elemendid.
+                Ülejäänud värvid (v.a valge) tuleb juurde arvata, need on nii-öelda sinise erijuhud.</li>
+                <li>Valge: Kujutab elemente, mis sisestatud hulka ei kuulu.</li>
+                <li><span class="punane">Punane</span>: Toimib, kui on valitud "Võrdlus". Eristab need alad, mis ringide diagrammil
+                ei kajastu, kuid on siiski olulised. Punane demonstreerib, miks ei ole ringide diagramm alati
+                Venni diagramm.</li>
+                <li><span class="roheline">Roheline</span>: Toob esile need elemendid, mis kuuluvad ainult teise kasti sisestatud hulka ja ei kuhugi mujale.</li>
+                <li><span class="helesinine">Helesinine</span>: Tähistab elemente, mis on teise kasti sisestatud hulgas. Erinevus rohelisest seisneb selles, et nendel aladel leidub ka muudesse hulkadesse
+                kuuluvaid elemente. Kollane on helesinise erijuht, mistõttu tuleb kollased alad helesinisele juurde arvata.</li>
+                <li><span class="kollane">Kollane</span>: Kujutab neid teise kasti sisestatud hulga elemente, mis ringide diagrammil ei kajastu. Sama idee, mis ka punasel
+                värvil, aga kehtib eraldi väljatoodava hulga puhul.</li>
+
             </ul>
         </div>
 
