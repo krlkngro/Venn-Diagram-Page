@@ -298,7 +298,7 @@ draw = function() {
     let coloredParts = equationResult[0][0];
     let midpoint = [canvas.width/2, canvas.height/2];
     let drawnParts = new Set();
-    let color = document.getElementById("color").value;
+    let color = document.getElementById("color").value.toUpperCase();
     let highlightedPart = 0;
     for (let letter of Array.from(color)) {
         highlightedPart += Math.pow(2,setNames.indexOf(letter));
