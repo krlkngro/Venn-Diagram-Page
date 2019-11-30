@@ -143,8 +143,8 @@ translateInput = function() {
             setNames.push(equation[i]);
         }
     }
-    if (setNames.length > 16) {
-        if (confirm("Üle 16 hulga ei ole soovitatav sisestada.")) {
+    if (setNames.length > 8) {
+        if (confirm("Üle 8 hulga ei ole soovitatav sisestada, kuna nende joonistamine võtab kaua aega ning viimaste hulkade osad on nägemiseks liiga väikesed. Vajutage 'OK' et katkestada joonistamine või 'Cancel' et siiski jätkata.")) {
             return false;
         }
     }
@@ -156,17 +156,6 @@ translateInput = function() {
     }
     setValues["Universaalhulk"] = Array.from(Array(Math.pow(2, setNames.length)).keys());
     return [solveEquation(equation, setValues), setNames];
-};
-circle = function(radius, startdeg, enddeg, xcenter, ycenter, color, context) {
-    context.beginPath();
-    context.arc(xcenter,ycenter,radius,startdeg*Math.PI/180,enddeg*Math.PI/180);
-    if(color) {
-        context.fillStyle = "blue";
-    } else {
-        context.fillStyle = "white";
-    }
-    context.fill();
-    context.stroke();
 };
 distance = function(point1, point2) {
     return (Math.sqrt(Math.pow((point2[0]-point1[0]),2) + Math.pow((point2[1]-point1[1]),2)));
@@ -181,6 +170,174 @@ pointsOfIntersection = function(P0, P1, r) {
     } else {
         return [(P1[0]+P0[0])/2, (P1[1]+P0[1])/2]
     }
+};
+drawCircles = function(canvas, setNames, coloredParts, highlightedPart, drawStyle) {
+    let drawnParts = new Set();
+    let ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = "source-over";
+    if (drawStyle === "highlight") {
+        ctx.globalCompositeOperation = "lighten";
+    }
+    let radius = 0.25 * Math.min(canvas.width, canvas.height);
+    let centers = [];
+    let midpoint = [canvas.width / 2, canvas.height / 2];
+    for (let i = 0; i < setNames.length; i++) {
+        centers.push([midpoint[0] + radius * (2 / 3) * Math.cos(2 * Math.PI * i / setNames.length), midpoint[1] + radius * (2 / 3) * Math.sin(2 * Math.PI * i / setNames.length)]);
+    }
+    for (let i = 1; i <= centers.length; i++) {
+        if (i === 1) {
+            for (let n = 0; n < (i === setNames.length ? 1 : setNames.length); n++) {
+                ctx.fillStyle = "white";
+                if (drawStyle === "highlight") {
+                    if (coloredParts.has(Math.pow(2, n))) {
+                        ctx.fillStyle = "lime";
+                    } else {
+                        continue;
+                    }
+                } else if (coloredParts.has(Math.pow(2, n))) {
+                    ctx.fillStyle = "blue";
+                    if (Math.pow(2, n) === highlightedPart) {
+                        ctx.fillStyle = "lime";
+                    }
+                }
+                ctx.beginPath();
+                ctx.arc(centers[n][0],centers[n][1],radius,0,2*Math.PI);
+                if (drawStyle !== "line") {
+                    ctx.fill();
+                }
+                ctx.stroke();
+                if (drawStyle === "highlight") {
+                    break;
+                }
+                drawnParts.add(Math.pow(2, n));
+                ctx.fillStyle = "black";
+                let fontSize = 15;
+                ctx.font = JSON.stringify(fontSize) + "px Arial";
+                let xChange = (centers[n][0]-midpoint[0])/distance(midpoint,centers[n]);
+                let yChange = (centers[n][1]-midpoint[1])/distance(midpoint,centers[n]);
+                let xAdjustment = 0;
+                let yAdjustment = 0;
+                if (yChange < 0) {
+                    yAdjustment = yChange*fontSize + 1;
+                }
+                if (Math.abs(xChange) > Math.abs(yChange)) {
+                    xAdjustment = -1*((Math.abs(xChange) - Math.abs(yChange)) * fontSize - 1 - (fontSize/2)*(xChange < 0));
+                }
+                ctx.fillText(setNames[n], (midpoint[0]) + (xChange) * (distance(midpoint,centers[n])+radius + 15 + xAdjustment), (midpoint[1]) + (yChange)* (distance(midpoint,centers[n])+radius + 15 + yAdjustment));
+            }
+        } else if (drawStyle === "line") {
+            return;
+        } else {
+            for (let n = 0; n < (i === setNames.length ? 1 : setNames.length); n++) {
+                let intersectionPoints = [];
+                for (let m = 0; m < (i > 2) * i + (i === 2); m++) {
+                    let points = pointsOfIntersection(centers[(n + m) % setNames.length], centers[(n + (m + 1) % i) % setNames.length], radius);
+                    for (let j = 1; j < i - 1; j++) {
+                        if (distance(centers[(n + (m + 1 + j) % (i)) % setNames.length], points[0]) > radius) {
+                            points.shift();
+                            break;
+                        } else if (distance(centers[(n + (m + 1 + j) % (i)) % setNames.length], points[1]) > radius) {
+                            points.pop();
+                            break;
+                        }
+                    }
+                    for (let point of points) {
+                        if (!JSON.stringify(intersectionPoints).includes(JSON.stringify(point))) {
+                            intersectionPoints.push(point);
+                        }
+                    }
+                }
+                ctx.beginPath();
+                let number = 0;
+                for (let m = 0; m < intersectionPoints.length; m++) {
+                    number += Math.pow(2, ((n + m) % setNames.length));
+                    let center = centers[(m + n) % setNames.length];
+                    let cosAlpha = 1 - Math.pow(distance(intersectionPoints[(m) % intersectionPoints.length], intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length]), 2) / (2 * Math.pow(radius, 2));
+                    let alpha = Math.acos(cosAlpha);
+                    let startPoint = [];
+                    if ((intersectionPoints[(m) % intersectionPoints.length][1] > center[1]) && (intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1] > center[1])) {
+                        if (intersectionPoints[(m) % intersectionPoints.length][0] > intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
+                            startPoint = intersectionPoints[(m) % intersectionPoints.length];
+                        } else {
+                            startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
+                        }
+                    } else if ((intersectionPoints[(m) % intersectionPoints.length][1] < center[1]) && (intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1] < center[1])) {
+                        if (intersectionPoints[(m) % intersectionPoints.length][0] < intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
+                            startPoint = intersectionPoints[(m) % intersectionPoints.length];
+                        } else {
+                            startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
+                        }
+                    } else {
+                        if ((intersectionPoints[(m) % intersectionPoints.length][1] + intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) / 2 === center[1]) {
+                            if ((intersectionPoints[(m) % intersectionPoints.length][0] + intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) / 2 >= center[0]) {
+                                if (intersectionPoints[(m) % intersectionPoints.length][1] < intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) {
+                                    startPoint = intersectionPoints[(m) % intersectionPoints.length];
+                                } else {
+                                    startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
+                                }
+                            } else {
+                                if (intersectionPoints[(m) % intersectionPoints.length][1] > intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) {
+                                    startPoint = intersectionPoints[(m) % intersectionPoints.length];
+                                } else {
+                                    startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
+                                }
+                            }
+                        } else {
+                            if ((intersectionPoints[(m) % intersectionPoints.length][1] + intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) / 2 > center[1]) {
+                                if (intersectionPoints[(m) % intersectionPoints.length][0] > intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
+                                    startPoint = intersectionPoints[(m) % intersectionPoints.length];
+                                } else {
+                                    startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
+                                }
+                            } else {
+                                if (intersectionPoints[(m) % intersectionPoints.length][0] <= intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
+                                    startPoint = intersectionPoints[(m) % intersectionPoints.length];
+                                } else {
+                                    startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
+                                }
+                            }
+                        }
+                    }
+                    let circleStart = [center[0] + radius, center[1]];
+                    let cosStart = 1 - Math.pow(distance(startPoint, circleStart), 2) / (2 * Math.pow(radius, 2));
+                    let startDegree = 0;
+                    if (startPoint[1] >= circleStart[1]) {
+                        startDegree = Math.acos(cosStart);
+                    } else {
+                        startDegree = 2 * Math.PI - Math.acos(cosStart);
+                    }
+                    ctx.arc(circleStart[0] - radius, circleStart[1], radius, startDegree, startDegree + alpha)
+                }
+                drawnParts.add(number);
+                if (drawStyle === "highlight") {
+                    if (coloredParts.has(number)) {
+                        ctx.fillStyle = "lime";
+                        ctx.fill();
+                        break
+                    } else {
+                        continue;
+                    }
+                }
+                if (coloredParts.has(number)) {
+                    if (highlightedPart === number) {
+                        ctx.fillStyle = "lime";
+                    } else {
+                        ctx.fillStyle = "blue";
+                    }
+                } else {
+                    ctx.fillStyle = "white";
+                }
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+        if (coloredParts.has(0)) {
+            canvas.style.background = "blue";
+        } else {
+            canvas.style.background = "white";
+        }
+    }
+    return drawnParts;
 };
 drawLobe = function(currentSet, radius, midpoint, context, fill) {
     context.beginPath();
@@ -234,9 +391,30 @@ drawLobe = function(currentSet, radius, midpoint, context, fill) {
     }
     context.stroke();
 };
-drawSineOrCosine = function(context, width, height, result, setAmount, drawnParts, choice, sine) {
-    context.clearRect(0, 0, width, height);
-    for (let i = 1; i < Math.pow(2, setAmount); i++) {
+drawSineOrCosine = function(canvas, coloredParts, setAmount, choice, sine, drawnParts, highlightedPart, drawStyle = "normal") {
+    if (drawStyle === "normal") {
+        if (coloredParts.has(0)) {
+            canvas.style.background = "blue";
+        } else {
+            canvas.style.background = "white";
+        }
+    }
+    let ctx = canvas.getContext("2d");
+    let width = canvas.width;
+    let height = canvas.height;
+    if (drawStyle === "highlight") {
+        ctx.globalCompositeOperation = "lighten";
+        ctx.fillStyle = "lime";
+    } else if (drawStyle === "normal"){
+        ctx.clearRect(0, 0, width, height);
+    } else if (drawStyle === "line") {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = "black";
+    }
+    for (let i = drawStyle==="highlight"? [...coloredParts][0]:1; i < (drawStyle==="highlight"? [...coloredParts][0]+1:Math.pow(2, setAmount)); i++) {
+        if (drawStyle === "line" && Math.log2(i) % 1 === 0) {
+            continue;
+        }
         let binary = i.toString(2);
         let coloredSets = [];
         for (let j = 0; j < binary.length; j++) {
@@ -244,11 +422,11 @@ drawSineOrCosine = function(context, width, height, result, setAmount, drawnPart
                 coloredSets.push(binary.length - 1 - j);
             }
         }
-        context.beginPath();
+        ctx.beginPath();
         if (sine) {
-            context.moveTo(0, height / 2);
+            ctx.moveTo(0, height / 2);
         } else {
-            context.moveTo(0, height / 2 - (((height - 10) / 2) / Math.pow(2, i)) * Math.cos(0));
+            ctx.moveTo(0, height / 2 - (((height - 10) / 2) / Math.pow(2, i)) * Math.cos(0));
         }
         for (let x = 0; x < width; x++) {
             let miny = 0;
@@ -263,353 +441,190 @@ drawSineOrCosine = function(context, width, height, result, setAmount, drawnPart
                     miny = y;
                 }
             }
-            context.lineTo(x + 1, miny);
+            ctx.lineTo(x + 1, miny);
         }
-        context.lineTo(width, height);
-        context.lineTo(0, height);
-        context.closePath();
-        if (result.has(i)) {
-            context.fillStyle = "blue";
-            if (choice === 2 && !drawnParts.has(i)) {
-                context.fillStyle = "orangered";
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        if (drawStyle === "normal") {
+            if (coloredParts.has(i)) {
+                ctx.fillStyle = "blue";
+                if (i === highlightedPart) {
+                    ctx.fillStyle = "lime";
+                } else if (!drawnParts.has(i) && choice === 2) {
+                    ctx.fillStyle = "orangered";
+                }
+            } else {
+                ctx.fillStyle = "white";
             }
-        } else {
-            context.fillStyle = "white";
         }
-        if (choice === 2 && !drawnParts.has(i)) {
-            context.strokeStyle = "firebrick";
-        } else {
-            context.strokeStyle = "black";
+        if (drawStyle !== "line") {
+            ctx.fill();
         }
-        context.fill();
-        context.stroke();
+        ctx.stroke();
+    }
+};
+drawEdwardsVennDiagram = function(canvas, coloredParts, setAmount, drawStyle) {
+    let midpoint = [canvas.width / 2,canvas.height / 2];
+    let radius = Math.min(midpoint[0], midpoint[1]) * 2 / 3;
+    let ctx = canvas.getContext("2d");
+    if (drawStyle === "line") {
+        ctx.globalCompositeOperation = "source-over";
+        for (let set = 1; set <= setAmount; set++) {
+            drawLobe(set,radius,[canvas.width/2,canvas.height/2],ctx, false);
+        }
+        return;
+    }
+    let maskCanvas = document.createElement('canvas'); //https://stackoverflow.com/questions/6271419/how-to-fill-the-opposite-shape-on-canvas/
+    maskCanvas.width = canvas.width;
+    maskCanvas.height = canvas.height;
+    let maskCtx = maskCanvas.getContext('2d');
+    let maskCanvas2 = document.createElement('canvas');
+    let maskCtx2 = maskCanvas2.getContext("2d");
+    maskCanvas2.width = canvas.width;
+    maskCanvas2.height = canvas.height;
+    let fillParts = new Set(coloredParts);
+    maskCtx.fillStyle = "white";
+    maskCtx.strokeStyle = "white";
+    maskCtx.globalCompositeOperation = 'xor';
+    maskCtx2.globalCompositeOperation = "source-over";
+    if (drawStyle === "normal") {
+        if (fillParts.size > Math.pow(2, setAmount) / 2) {
+            fillParts = difference(Array.from(Array(Math.pow(2, setAmount)).keys()), fillParts);
+            ctx.fillStyle = "blue";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            maskCtx.fillStyle = "blue";
+            maskCtx.strokeStyle = "blue";
+            maskCtx2.fillStyle = "white";
+            ctx.globalCompositeOperation = "lighten";
+        } else {
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = "darken";
+            maskCtx2.fillStyle = "blue";
+        }
+    } else {
+        maskCtx2.fillStyle = drawStyle === "compare"? "orangered":"lime";
+        ctx.globalCompositeOperation = drawStyle==="highlight-full"? "lighten":"source-over";
+    }
+    for (let part of fillParts) {
+        if (drawStyle !== "normal") {
+            maskCtx2.globalCompositeOperation = "source-over";
+            if (part === 0) {
+                continue;
+            }
+        }
+        maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
+        let binary = part.toString(2);
+        if (drawStyle === "highlight-full") {
+            binary = binary.split("").reverse().join("");
+        } else {
+            let maxBinary = (Math.pow(2, setAmount) - 1).toString(2);
+            if (maxBinary.length > binary.length) {
+                binary = "0".repeat(maxBinary.length - binary.length) + binary;
+            }
+        }
+        let one = binary.indexOf("1");
+        if (part === 0) {
+            maskCtx2.fillRect(0, 0, maskCanvas2.width, maskCanvas2.height);
+        } else {
+            drawLobe(drawStyle === "highlight-full"? (one+1):(binary.length-one), radius, [maskCanvas2.width / 2, maskCanvas2.height / 2], maskCtx2, true);
+        }
+        if (drawStyle !== "normal") {
+            maskCtx2.globalCompositeOperation = "destination-out";
+        }
+        for (let k = 0; k <= binary.length; k++) {
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            if (binary[k] === "1") {
+                maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+                if (drawStyle === "highlight-full") {
+                    drawLobe( k+1, radius, [maskCanvas.width / 2, maskCanvas.height / 2], maskCtx, true);
+                }
+            }
+            if (drawStyle !== "highlight-full") {
+                drawLobe(binary.length - k, radius, [maskCanvas.width / 2, maskCanvas.height / 2], maskCtx, true);
+            }
+            maskCtx2.drawImage(maskCanvas, 0, 0)
+        }
+        ctx.drawImage(maskCanvas2, 0, 0);
+    }
+};
+drawDiagrams = function(canvases, choice, coloredParts, setNames, highlightedPart) {
+    let drawnParts = new Set();
+    for (let canvas = 0; canvas < canvases.length; canvas++) {
+        canvases[canvas].getContext("2d").clearRect(0, 0, canvases[canvas].width, canvases[canvas].height);
+        canvases[canvas].style.display = "none";
+        if (choice !== 1 && canvas===0) {
+            canvases[canvas].style.display = "flex";
+            drawnParts = drawCircles(canvases[canvas],setNames, coloredParts,highlightedPart);
+        } else if (choice > 0) {
+            if (canvas > 0) {
+                canvases[canvas].style.display = "flex";
+                if (canvas === 3) {
+                    drawEdwardsVennDiagram(canvases[canvas],coloredParts, setNames.length, "normal");
+                    drawEdwardsVennDiagram(canvases[canvas],new Set([highlightedPart]), setNames.length, "highlight-single");
+                    if (choice === 2) {
+                        drawEdwardsVennDiagram(canvases[canvas], difference(coloredParts, drawnParts), setNames.length, "compare")
+                    }
+                    continue;
+                }
+                drawSineOrCosine(canvases[canvas], coloredParts, setNames.length, choice,canvas===1, drawnParts, highlightedPart);
+            }
+        }
+    }
+};
+highlightParts = function(canvases, choice, setNames, fullHighlightPart) {
+    for(let canvas = 0; canvas < canvases.length; canvas++) {
+        if (canvas === 0) {
+            if (choice !== 1) {
+                drawCircles(canvases[canvas], setNames, new Set([fullHighlightPart]),new Set(), "highlight");
+            }
+        } else if (choice > 0) {
+            if (canvas === 3) {
+                drawEdwardsVennDiagram(canvases[canvas], new Set([fullHighlightPart]), setNames.length, "highlight-full");
+                continue;
+            }
+            drawSineOrCosine(canvases[canvas],new Set([fullHighlightPart]), setNames.length, choice, canvas===1, new Set(), 0, "highlight")
+        }
+    }
+};
+drawDiagramLines = function(canvases, choice, setNames) {
+    for(let canvas = 0; canvas < canvases.length; canvas++) {
+        if (canvas === 0) {
+            if (choice !== 1) {
+                drawCircles(canvases[canvas], setNames, new Set(),new Set(), "line");
+            }
+        } else if (choice > 0) {
+            if (canvas === 3) {
+                drawEdwardsVennDiagram(canvases[canvas], [], setNames.length, "line");
+                continue;
+            }
+            drawSineOrCosine(canvases[canvas],new Set(), setNames.length, choice, canvas===1, new Set(), 0, "line")
+        }
     }
 };
 draw = function() {
-    let canvas = document.getElementById("canvas");
-    let ctx = canvas.getContext("2d");
+    let canvases = [];
+    for (let i = 1; i < 5; i++) {
+        canvases.push(document.getElementById("canvas"+i))
+    }
     let choice = parseInt(document.querySelector('input[name="choice"]:checked').value);
     let equationResult = translateInput();
     if (equationResult === false) {
         return;
     }
     let setNames = equationResult[1];
-    let setAmount = equationResult[1].length;
     let coloredParts = equationResult[0][0];
-    let midpoint = [canvas.width/2, canvas.height/2];
-    let drawnParts = new Set();
-    let color = document.getElementById("color").value.toUpperCase();
+    let highlightSets = document.getElementById("color").value.toUpperCase();
     let highlightedPart = 0;
-    for (let letter of Array.from(color)) {
+    for (let letter of Array.from(highlightSets)) {
         highlightedPart += Math.pow(2,setNames.indexOf(letter));
     }
-    let completeHighlightedPart = highlightedPart;
+    let fullHighlightedPart = highlightedPart;
     highlightedPart = coloredParts.has(highlightedPart)*highlightedPart;
-    if (choice % 2 === 0) {
-        canvas.style.display = "flex";
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        let radius = 0.25 * Math.min(canvas.width, canvas.height);
-        let centers = [];
-        let x = canvas.width / 2;
-        let y = canvas.height / 2;
-        for (let i = 0; i < setAmount; i++) {
-            centers.push([x + radius * (2 / 3) * Math.cos(2 * Math.PI * i / setAmount), y + radius * (2 / 3) * Math.sin(2 * Math.PI * i / setAmount)]);
-        }
-        for (let i = 1; i <= centers.length; i++) {
-            if (i === 1) {
-                for (let n = 0; n < (i === setAmount ? 1 : setAmount); n++) {
-                    circle(radius, 0, 360, centers[n][0], centers[n][1], coloredParts.has(Math.pow(2, (n))), ctx);
-                    drawnParts.add(Math.pow(2, n));
-                    ctx.fillStyle = "black";
-                    let fontSize = 15;
-                    ctx.font = JSON.stringify(fontSize) + "px Arial";
-                    let xChange = (centers[n][0]-(midpoint[0]))/distance(midpoint,centers[n]);
-                    let yChange = (centers[n][1]-(midpoint[1]))/distance(midpoint,centers[n]);
-                    let xAdjustment = 0;
-                    let yAdjustment = 0;
-                    if (yChange < 0) {
-                        yAdjustment = yChange*fontSize + 1;
-                    }
-                    if (Math.abs(xChange) > Math.abs(yChange)) {
-                        xAdjustment = -1*((Math.abs(xChange) - Math.abs(yChange)) * fontSize - 1 - (fontSize/2)*(xChange < 0));
-                    }
-                    ctx.fillText(setNames[n], (midpoint[0]) + (xChange) * (distance(midpoint,centers[n])+radius + 15 + xAdjustment), (midpoint[1]) + (yChange)* (distance(midpoint,centers[n])+radius + 15 + yAdjustment));
-                }
-            } else {
-                for (let n = 0; n < (i === setAmount ? 1 : setAmount); n++) {
-                    let intersectionPoints = [];
-                    for (let m = 0; m < (i > 2) * i + (i === 2); m++) {
-                        let points = pointsOfIntersection(centers[(n + m) % setAmount], centers[(n + (m + 1) % i) % setAmount], radius);
-                        for (let j = 1; j < i - 1; j++) {
-                            if (distance(centers[(n + (m + 1 + j) % (i)) % setAmount], points[0]) > radius) {
-                                points.shift();
-                                break;
-                            } else if (distance(centers[(n + (m + 1 + j) % (i)) % setAmount], points[1]) > radius) {
-                                points.pop();
-                                break;
-                            }
-                        }
-                        for (let point of points) {
-                            if (!JSON.stringify(intersectionPoints).includes(JSON.stringify(point))) {
-                                intersectionPoints.push(point);
-                            }
-                        }
-                    }
-                    ctx.beginPath();
-                    let number = 0;
-                    for (let m = 0; m < intersectionPoints.length; m++) {
-                        number += Math.pow(2, ((n + m) % setAmount));
-                        let center = centers[(m + n) % setAmount];
-                        let cosAlpha = 1 - Math.pow(distance(intersectionPoints[(m) % intersectionPoints.length], intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length]), 2) / (2 * Math.pow(radius, 2));
-                        let alpha = Math.acos(cosAlpha);
-                        let startPoint = [];
-                        if ((intersectionPoints[(m) % intersectionPoints.length][1] > center[1]) && (intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1] > center[1])) {
-                            if (intersectionPoints[(m) % intersectionPoints.length][0] > intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
-                                startPoint = intersectionPoints[(m) % intersectionPoints.length];
-                            } else {
-                                startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
-                            }
-                        } else if ((intersectionPoints[(m) % intersectionPoints.length][1] < center[1]) && (intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1] < center[1])) {
-                            if (intersectionPoints[(m) % intersectionPoints.length][0] < intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
-                                startPoint = intersectionPoints[(m) % intersectionPoints.length];
-                            } else {
-                                startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
-                            }
-                        } else {
-                            if ((intersectionPoints[(m) % intersectionPoints.length][1] + intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) / 2 === center[1]) {
-                                if ((intersectionPoints[(m) % intersectionPoints.length][0] + intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) / 2 >= center[0]) {
-                                    if (intersectionPoints[(m) % intersectionPoints.length][1] < intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) {
-                                        startPoint = intersectionPoints[(m) % intersectionPoints.length];
-                                    } else {
-                                        startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
-                                    }
-                                } else {
-                                    if (intersectionPoints[(m) % intersectionPoints.length][1] > intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) {
-                                        startPoint = intersectionPoints[(m) % intersectionPoints.length];
-                                    } else {
-                                        startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
-                                    }
-                                }
-                            } else {
-                                if ((intersectionPoints[(m) % intersectionPoints.length][1] + intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][1]) / 2 > center[1]) {
-                                    if (intersectionPoints[(m) % intersectionPoints.length][0] > intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
-                                        startPoint = intersectionPoints[(m) % intersectionPoints.length];
-                                    } else {
-                                        startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
-                                    }
-                                } else {
-                                    if (intersectionPoints[(m) % intersectionPoints.length][0] <= intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length][0]) {
-                                        startPoint = intersectionPoints[(m) % intersectionPoints.length];
-                                    } else {
-                                        startPoint = intersectionPoints[((m - 1) >= 0 ? (m - 1) : intersectionPoints.length + (m - 1)) % intersectionPoints.length];
-                                    }
-                                }
-                            }
-                        }
-                        let circleStart = [center[0] + radius, center[1]];
-                        let cosStart = 1 - Math.pow(distance(startPoint, circleStart), 2) / (2 * Math.pow(radius, 2));
-                        let startDegree = 0;
-                        if (startPoint[1] >= circleStart[1]) {
-                            startDegree = Math.acos(cosStart);
-                        } else {
-                            startDegree = 2 * Math.PI - Math.acos(cosStart);
-                        }
-                        ctx.arc(circleStart[0] - radius, circleStart[1], radius, startDegree, startDegree + alpha)
-                    }
-                    drawnParts.add(number);
-                    if (coloredParts.has(number)) {
-                        ctx.fillStyle = "blue";
-                    } else {
-                        ctx.fillStyle = "white";
-                    }
-                    ctx.fill();
-                    ctx.stroke();
-                }
-            }
-            if (coloredParts.has(0)) {
-                canvas.style.background = "blue";
-            } else {
-                canvas.style.background = "white";
-            }
-        }
-    } else {
-        canvas.style.display = "none";
+    drawDiagrams(canvases,choice,coloredParts,setNames,highlightedPart);
+    if (fullHighlightedPart > 0) {
+        highlightParts(canvases, choice, setNames, fullHighlightedPart);
     }
-
-    //Draw a Venn diagram using the sine function
-    let canvas2 = document.getElementById("canvas2");
-    let ctx2 = canvas2.getContext("2d");
-    if (coloredParts.has(0)) {
-        canvas2.style.background = "blue";
-    } else {
-        canvas2.style.background = "white";
-    }
-    if (choice > 0) {
-        canvas2.style.display= "flex";
-        drawSineOrCosine(ctx2,canvas2.width,canvas2.height,coloredParts,setAmount,drawnParts,choice,true);
-    } else {
-        canvas2.style.display = "none";
-    }
-
-    //Draw a Venn diagram using the cosine function
-    let canvas3 = document.getElementById("canvas3");
-    let ctx3 = canvas3.getContext("2d");
-    if (coloredParts.has(0)) {
-        canvas3.style.background = "blue";
-    } else {
-        canvas3.style.background = "white";
-    }
-    if (choice > 0) {
-        canvas3.style.display = "flex";
-        drawSineOrCosine(ctx3,canvas3.width,canvas3.height,coloredParts,setAmount,drawnParts,choice,false);
-    } else {
-        canvas3.style.display = "none";
-    }
-
-    //Draw an Edwards-Venn diagram
-    let canvas4 = document.getElementById("canvas4");
-    let ctx4 = canvas4.getContext("2d");
-    if (choice>0) {
-        canvas4.style.display = "flex";
-        ctx4.clearRect(0, 0, canvas4.width, canvas4.height);
-        let midx = canvas4.width / 2;
-        let midy = canvas4.height / 2;
-        let radius = Math.min(midx, midy) * 2 / 3;
-
-        let maskCanvas = document.createElement('canvas'); //https://stackoverflow.com/questions/6271419/how-to-fill-the-opposite-shape-on-canvas/
-        maskCanvas.width = canvas4.width;
-        maskCanvas.height = canvas4.height;
-        let maskCtx = maskCanvas.getContext('2d');
-
-        maskCtx.fillStyle = "white";
-        maskCtx.strokeStyle = "white";
-        maskCtx.globalCompositeOperation = 'xor';
-        let maskCanvas2 = document.createElement('canvas');
-        let maskCtx2 = maskCanvas2.getContext("2d");
-        maskCanvas2.width = canvas4.width;
-        maskCanvas2.height = canvas4.height;
-        let switched = false;
-        if (coloredParts.size > Math.pow(2, setAmount) / 2) {
-            switched = true;
-            coloredParts = difference(Array.from(Array(Math.pow(2, setNames.length)).keys()), coloredParts);
-            ctx4.fillStyle = "blue";
-            ctx4.fillRect(0, 0, canvas4.width, canvas4.height);
-            maskCtx.fillStyle = "blue";
-            maskCtx.strokeStyle = "blue";
-            maskCtx2.fillStyle = "white";
-            ctx4.globalCompositeOperation = "lighten";
-        } else {
-            ctx4.fillStyle = "white";
-            ctx4.fillRect(0, 0, canvas4.width, canvas4.height);
-            ctx4.globalCompositeOperation = "darken";
-            maskCtx2.fillStyle = "blue";
-        }
-        for (let i of coloredParts) {
-            maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
-            let binary = i.toString(2);
-            let maxBinary = (Math.pow(2, setAmount) - 1).toString(2);
-            if (maxBinary.length > binary.length) {
-                binary = "0".repeat(maxBinary.length - binary.length) + binary;
-            }
-            let one = binary.indexOf("1");
-            if (i === 0) {
-                maskCtx2.fillRect(0, 0, maskCanvas2.width, maskCanvas2.height);
-            } else {
-                drawLobe(binary.length - one, radius, [maskCanvas2.width / 2, maskCanvas2.height / 2], maskCtx2, true);
-            }
-            for (let k = 0; k <= binary.length; k++) {
-                maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-                if (binary[k] === "1") {
-                    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                }
-                drawLobe(binary.length - k, radius, [maskCanvas.width / 2, maskCanvas.height / 2], maskCtx, true);
-                maskCtx2.drawImage(maskCanvas, 0, 0)
-            }
-            ctx4.drawImage(maskCanvas2, 0, 0);
-        }
-        ctx4.globalCompositeOperation = "source-over";
-        if (choice === 2) {
-            if (switched) {
-                coloredParts = difference(Array.from(Array(Math.pow(2, setNames.length)).keys()), coloredParts);
-            }
-            for (let part of difference(coloredParts,drawnParts)) {
-                if (part === 0) {
-                    continue;
-                }
-                maskCtx2.fillStyle = "orangered";
-                maskCtx2.globalCompositeOperation = "source-over";
-                maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
-                let binary = part.toString(2);
-                let maxbinary = (Math.pow(2, setAmount) - 1).toString(2);
-                if (maxbinary.length > binary.length) {
-                    binary = "0".repeat(maxbinary.length - binary.length) + binary;
-                }
-                let one = binary.indexOf("1");
-                drawLobe(binary.length - one, radius, [maskCanvas2.width / 2, maskCanvas2.height / 2], maskCtx2, true);
-                for (let k = 0; k <= binary.length; k++) {
-                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-                    if (binary[k] === "1") {
-                        maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                    }
-                    drawLobe(binary.length - k, radius, [maskCanvas.width / 2, maskCanvas.height / 2], maskCtx, true);
-                    maskCtx2.globalCompositeOperation = "destination-out";
-                    maskCtx2.drawImage(maskCanvas, 0, 0)
-                }
-                ctx4.drawImage(maskCanvas2, 0, 0);
-            }
-            ctx4.globalCompositeOperation = "lighten";
-            if (completeHighlightedPart > 0) {
-                maskCtx2.fillStyle = "lime";
-                maskCtx2.globalCompositeOperation = "source-over";
-                maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
-                let binary = completeHighlightedPart.toString(2).split("").reverse().join("");
-                let one = binary.indexOf("1");
-                if (completeHighlightedPart === 0) {
-                    maskCtx2.fillRect(0, 0, maskCanvas2.width, maskCanvas2.height);
-                } else {
-                    drawLobe(one + 1, radius, [maskCanvas2.width / 2, maskCanvas2.height / 2], maskCtx2, true);
-                }
-                maskCtx2.globalCompositeOperation = "destination-out";
-                for (let k = 0; k <= binary.length; k++) {
-                    maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-                    if (binary[k] === "1") {
-                        maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                        drawLobe(k + 1, radius, [maskCanvas.width / 2, maskCanvas.height / 2], maskCtx, true);
-                        maskCtx2.drawImage(maskCanvas, 0, 0);
-                    }
-                }
-                ctx4.drawImage(maskCanvas2, 0, 0);
-            }
-        }
-        ctx4.globalCompositeOperation = "source-over";
-//
-        if (highlightedPart > 0) {
-            maskCtx2.fillStyle = "lime";
-            maskCtx2.globalCompositeOperation = "source-over";
-            maskCtx2.clearRect(0, 0, maskCanvas2.width, maskCanvas2.height);
-            let binary = highlightedPart.toString(2);
-            let maxbinary = (Math.pow(2, setAmount) - 1).toString(2);
-            if (maxbinary.length > binary.length) {
-                binary = "0".repeat(maxbinary.length - binary.length) + binary;
-            }
-            let one = binary.indexOf("1");
-            drawLobe(binary.length - one, radius, [maskCanvas2.width / 2, maskCanvas2.height / 2], maskCtx2, true);
-            for (let k = 0; k <= binary.length; k++) {
-                maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
-                if (binary[k] === "1") {
-                    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-                }
-                drawLobe(binary.length - k, radius, [maskCanvas.width / 2, maskCanvas.height / 2], maskCtx, true);
-                maskCtx2.globalCompositeOperation = "destination-out";
-                maskCtx2.drawImage(maskCanvas, 0, 0)
-            }
-            ctx4.drawImage(maskCanvas2, 0, 0);
-        }
-//
-        for (let i = 1; i <= setAmount; i++) {
-            drawLobe(i,radius,[canvas4.width/2,canvas4.height/2],ctx4, false);
-        }
-    } else {
-        canvas4.style.display = "none"
-    }
+    drawDiagramLines(canvases, choice, setNames);
 };
