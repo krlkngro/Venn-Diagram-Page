@@ -618,6 +618,11 @@ draw = function() {
     let highlightSets = document.getElementById("color").value.toUpperCase();
     let highlightedPart = 0;
     for (let letter of Array.from(highlightSets)) {
+        if (!setNames.includes(letter)) {
+            alert("Palun ärge sisestage esiletõstmisvälja hulganimesid, mis ei esine tehtes.");
+            highlightedPart = 0;
+            break;
+        }
         highlightedPart += Math.pow(2,setNames.indexOf(letter));
     }
     let fullHighlightedPart = highlightedPart;
