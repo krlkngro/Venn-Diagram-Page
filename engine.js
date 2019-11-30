@@ -1,12 +1,12 @@
-union = function(set1,set2) {
+function union (set1,set2) {
     let result = new Set(set1);
     for (let element of set2) {
         result.add(element);
     }
     return result;
-};
+}
 
-intersection = function(set1, set2) {
+function intersection (set1, set2) {
     let result = new Set();
     for (let element of set1) {
         if (set2.has(element)) {
@@ -14,9 +14,9 @@ intersection = function(set1, set2) {
         }
     }
     return result;
-};
+}
 
-difference = function(set1, set2) {
+function difference (set1, set2) {
     let result = new Set(set1);
     for (let element of set1) {
         if (set2.has(element)) {
@@ -24,13 +24,13 @@ difference = function(set1, set2) {
         }
     }
     return result;
-};
+}
 
-symmetricDifference = function(set1, set2) {
-    return union(difference(set1,set2), difference(set2,set1))
-};
+function symmetricDifference (set1, set2) {
+    return union(difference(set1,set2), difference(set2,set1));
+}
 
-solveEquation = function(equation, set) {
+function solveEquation (equation, set) {
     let counter = 0;
     let previousPart = "";
     let nextPart = "";
@@ -124,16 +124,16 @@ solveEquation = function(equation, set) {
             equation = equation.slice(result[1] + 1);
         } else if (equation[0] === ")") {
             counter += 1;
-            return ([previousPart, counter])
+            return ([previousPart, counter]);
         } else if (equation[0] === "'") {
             previousPart = difference(set["Universaalhulk"], previousPart);
             counter += 1;
             equation = equation.slice(1);
         }
     }
-    return [previousPart, counter]
-};
-translateInput = function() {
+    return [previousPart, counter];
+}
+function translateInput () {
     let equation = document.getElementById("equation").value.replace(/\s+/g, '');
     equation = equation.toUpperCase();
     let operations = ["|", "&", "-", "^", "'", "(", ")"];
@@ -156,22 +156,23 @@ translateInput = function() {
     }
     setValues["Universaalhulk"] = Array.from(Array(Math.pow(2, setNames.length)).keys());
     return [solveEquation(equation, setValues), setNames];
-};
-distance = function(point1, point2) {
+}
+
+function distance (point1, point2) {
     return (Math.sqrt(Math.pow((point2[0]-point1[0]),2) + Math.pow((point2[1]-point1[1]),2)));
-};
-pointsOfIntersection = function(P0, P1, r) {
+}
+function pointsOfIntersection (P0, P1, r) {
     let d = distance(P0,P1);
     if (d.toFixed(7) !== (r*2).toFixed(7)) {
         let a = (d)/(2);
         let h = Math.sqrt(Math.pow(r,2)-Math.pow(a,2));
         let P2 = [P0[0]+a*(P1[0]-P0[0])/d, P0[1]+a*(P1[1]-P0[1])/d];
-        return [[P2[0]+h*(P1[1]-P0[1])/d,P2[1]-h*(P1[0]-P0[0])/d],[P2[0]-h*(P1[1]-P0[1])/d, P2[1]+h*(P1[0]-P0[0])/d]]
+        return [[P2[0]+h*(P1[1]-P0[1])/d,P2[1]-h*(P1[0]-P0[0])/d],[P2[0]-h*(P1[1]-P0[1])/d, P2[1]+h*(P1[0]-P0[0])/d]];
     } else {
-        return [(P1[0]+P0[0])/2, (P1[1]+P0[1])/2]
+        return [(P1[0]+P0[0])/2, (P1[1]+P0[1])/2];
     }
-};
-drawCircles = function(canvas, setNames, coloredParts, highlightedPart, drawStyle) {
+}
+function drawCircles (canvas, setNames, coloredParts, highlightedPart, drawStyle) {
     let drawnParts = new Set();
     let ctx = canvas.getContext("2d");
     ctx.globalCompositeOperation = "source-over";
@@ -306,14 +307,14 @@ drawCircles = function(canvas, setNames, coloredParts, highlightedPart, drawStyl
                     } else {
                         startDegree = 2 * Math.PI - Math.acos(cosStart);
                     }
-                    ctx.arc(circleStart[0] - radius, circleStart[1], radius, startDegree, startDegree + alpha)
+                    ctx.arc(circleStart[0] - radius, circleStart[1], radius, startDegree, startDegree + alpha);
                 }
                 drawnParts.add(number);
                 if (drawStyle === "highlight") {
                     if (coloredParts.has(number)) {
                         ctx.fillStyle = "lime";
                         ctx.fill();
-                        break
+                        return;
                     } else {
                         continue;
                     }
@@ -338,8 +339,8 @@ drawCircles = function(canvas, setNames, coloredParts, highlightedPart, drawStyl
         }
     }
     return drawnParts;
-};
-drawLobe = function(currentSet, radius, midpoint, context, fill) {
+}
+function drawLobe (currentSet, radius, midpoint, context, fill) {
     context.beginPath();
     if (currentSet === 1) {
         context.rect(0,midpoint[1], midpoint[0]*2, midpoint[1]);
@@ -390,8 +391,8 @@ drawLobe = function(currentSet, radius, midpoint, context, fill) {
         context.fill();
     }
     context.stroke();
-};
-drawSineOrCosine = function(canvas, coloredParts, setAmount, choice, sine, drawnParts, highlightedPart, drawStyle = "normal") {
+}
+function drawSineOrCosine (canvas, coloredParts, setAmount, choice, sine, drawnParts, highlightedPart, drawStyle = "normal") {
     if (drawStyle === "normal") {
         if (coloredParts.has(0)) {
             canvas.style.background = "blue";
@@ -463,8 +464,8 @@ drawSineOrCosine = function(canvas, coloredParts, setAmount, choice, sine, drawn
         }
         ctx.stroke();
     }
-};
-drawEdwardsVennDiagram = function(canvas, coloredParts, setAmount, drawStyle) {
+}
+function drawEdwardsVennDiagram (canvas, coloredParts, setAmount, drawStyle) {
     let midpoint = [canvas.width / 2,canvas.height / 2];
     let radius = Math.min(midpoint[0], midpoint[1]) * 2 / 3;
     let ctx = canvas.getContext("2d");
@@ -544,12 +545,12 @@ drawEdwardsVennDiagram = function(canvas, coloredParts, setAmount, drawStyle) {
             if (drawStyle !== "highlight-full") {
                 drawLobe(binary.length - k, radius, [maskCanvas.width / 2, maskCanvas.height / 2], maskCtx, true);
             }
-            maskCtx2.drawImage(maskCanvas, 0, 0)
+            maskCtx2.drawImage(maskCanvas, 0, 0);
         }
         ctx.drawImage(maskCanvas2, 0, 0);
     }
-};
-drawDiagrams = function(canvases, choice, coloredParts, setNames, highlightedPart) {
+}
+function drawDiagrams (canvases, choice, coloredParts, setNames, highlightedPart) {
     let drawnParts = new Set();
     for (let canvas = 0; canvas < canvases.length; canvas++) {
         canvases[canvas].getContext("2d").clearRect(0, 0, canvases[canvas].width, canvases[canvas].height);
@@ -564,7 +565,7 @@ drawDiagrams = function(canvases, choice, coloredParts, setNames, highlightedPar
                     drawEdwardsVennDiagram(canvases[canvas],coloredParts, setNames.length, "normal");
                     drawEdwardsVennDiagram(canvases[canvas],new Set([highlightedPart]), setNames.length, "highlight-single");
                     if (choice === 2) {
-                        drawEdwardsVennDiagram(canvases[canvas], difference(coloredParts, drawnParts), setNames.length, "compare")
+                        drawEdwardsVennDiagram(canvases[canvas], difference(coloredParts, drawnParts), setNames.length, "compare");
                     }
                     continue;
                 }
@@ -572,8 +573,8 @@ drawDiagrams = function(canvases, choice, coloredParts, setNames, highlightedPar
             }
         }
     }
-};
-highlightParts = function(canvases, choice, setNames, fullHighlightPart) {
+}
+function highlightParts (canvases, choice, setNames, fullHighlightPart) {
     for(let canvas = 0; canvas < canvases.length; canvas++) {
         if (canvas === 0) {
             if (choice !== 1) {
@@ -584,11 +585,11 @@ highlightParts = function(canvases, choice, setNames, fullHighlightPart) {
                 drawEdwardsVennDiagram(canvases[canvas], new Set([fullHighlightPart]), setNames.length, "highlight-full");
                 continue;
             }
-            drawSineOrCosine(canvases[canvas],new Set([fullHighlightPart]), setNames.length, choice, canvas===1, new Set(), 0, "highlight")
+            drawSineOrCosine(canvases[canvas],new Set([fullHighlightPart]), setNames.length, choice, canvas===1, new Set(), 0, "highlight");
         }
     }
-};
-drawDiagramLines = function(canvases, choice, setNames) {
+}
+function drawDiagramLines (canvases, choice, setNames) {
     for(let canvas = 0; canvas < canvases.length; canvas++) {
         if (canvas === 0) {
             if (choice !== 1) {
@@ -599,14 +600,14 @@ drawDiagramLines = function(canvases, choice, setNames) {
                 drawEdwardsVennDiagram(canvases[canvas], [], setNames.length, "line");
                 continue;
             }
-            drawSineOrCosine(canvases[canvas],new Set(), setNames.length, choice, canvas===1, new Set(), 0, "line")
+            drawSineOrCosine(canvases[canvas],new Set(), setNames.length, choice, canvas===1, new Set(), 0, "line");
         }
     }
-};
-draw = function() {
+}
+function draw () {
     let canvases = [];
     for (let i = 1; i < 5; i++) {
-        canvases.push(document.getElementById("canvas"+i))
+        canvases.push(document.getElementById("canvas"+i));
     }
     let choice = parseInt(document.querySelector('input[name="choice"]:checked').value);
     let equationResult = translateInput();
@@ -632,4 +633,4 @@ draw = function() {
         highlightParts(canvases, choice, setNames, fullHighlightedPart);
     }
     drawDiagramLines(canvases, choice, setNames);
-};
+}
