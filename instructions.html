@@ -13,7 +13,7 @@
 
             <ul>
                 <li><a href="index.html">Avaleht</a></li>
-                <li><a href="canvastest.html">Generaator</a></li>
+                <li><a href="generaator.html">Generaator</a></li>
                 <li><a href="instructions.html">Kasutusjuhis</a></li>
                 <li><a href="about.html">Meist</a></li>
             </ul>
@@ -30,13 +30,19 @@
                     mis alates 4 hulgast ei liigitu enam Venni diagrammiks ehk seal ei ole kõikvõimalikke hulkade vahelisi seoseid kujutatud.</li>
                 <li><strong>Ainult Venni diagramm:</strong><br>Kuvatakse ainult need diagrammid, mis mistahes hulkade arvu puhul liigituvad kindlasti Venni diagrammiks.</li>
                 <li><strong>Võrdle:</strong><br>Kombinatsioon kahest eelnevast valikust. Kuvatakse kõik diagrammid ning punasega märgitakse alad, mis ringide diagrammil ei kajastu.</li>
+                <li><strong>Kõik</strong>: Kuvab kõikvõimalikud diagrammid, ilma võrdlust kasutamata.</li>
             </ul>
 
             <h2>Sisestamine</h2>
             <p>
-                Valem tuleb sisestada vasakpoolsesse kasti, lähtudes hulgateoreetiliste tehete kirjutamise tavapärastest reeglitest. Vajadusel kasutada sulge.<br>
+                Valem tuleb sisestada vasakpoolsesse kasti, lähtudes hulgateoreetiliste tehete kirjutamise tavapärastest reeglitest. Vajadusel kasutada sulge.
+                Hulkade tähised peavad olema ühe sümboli pikkused, kusjuures ei tohi kasutada hulgatehete sümboleid.<br>
                 Diagrammidel kuvatakse hulgad tähestikulises järjekorras hulgatähiste järgi. Näiteks hulk E paistab sinusoidsetel ja Edwardsi diagrammidel suurema alana/joonena
                 kui hulk M.
+            </p>
+            <p>
+                Venni diagrammide generaator võimaldab korraga kuvada mistahes arvu hulki, kuid on soovitatav sisestada mitte rohkem kui kaheksa hulka. Vastasel juhul võtaks
+                diagrammide genereerimine oluliselt rohkem aega ning hulgad poleks seal visuaalselt eristatavad.
             </p>
             <p>
                 Tähistused:
@@ -71,18 +77,16 @@
                 <li><span class="sinine">Sinine</span>: Tähistab neid alasid, kus on sisestatud hulga elemendid.
                 Ülejäänud värvid (v.a valge) tuleb juurde arvata, need on nii-öelda sinise erijuhud.</li>
                 <li>Valge: Kujutab elemente, mis sisestatud hulka ei kuulu.</li>
-                <li><span class="punane">Punane</span>: Toimib, kui on valitud "Võrdlus". Eristab need alad, mis ringide diagrammil
+                <li><span class="punane">Punane</span>: Toimib, kui on valitud "Võrdle". Eristab need alad, mis ringide diagrammil
                 ei kajastu, kuid on siiski olulised. Punane demonstreerib, miks ei ole ringide diagramm alati
                 Venni diagramm.</li>
                 <li><span class="roheline">Roheline</span>: Toob esile need elemendid, mis kuuluvad ainult teise kasti sisestatud hulka ja ei kuhugi mujale.</li>
                 <li><span class="helesinine">Helesinine</span>: Tähistab elemente, mis on teise kasti sisestatud hulgas. Erinevus rohelisest seisneb selles, et nendel aladel leidub ka muudesse hulkadesse
                 kuuluvaid elemente. Kollane on helesinise erijuht, mistõttu tuleb kollased alad helesinisele juurde arvata.</li>
-                <li><span class="kollane">Kollane</span>: Kujutab neid teise kasti sisestatud hulga elemente, mis ringide diagrammil ei kajastu. Sama idee, mis ka punasel
-                värvil, aga kehtib eraldi väljatoodava hulga puhul.</li>
+                <li><span class="kollane">Kollane</span>: Esineb ainult siis, kui on valitud "Võrdle". Kujutab neid teise kasti sisestatud hulga elemente, mis ringide diagrammil ei kajastu. Sama idee, mis ka punasel
+                värvil, aga kehtib eraldi väljatoodud hulga puhul.</li>
 
             </ul>
         </div>
-
-
     </body>
 </html>

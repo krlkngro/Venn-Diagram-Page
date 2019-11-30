@@ -75,3 +75,10 @@ body{
     margin-bottom: 10px;
     text-align: justify;
 }
+.container a{
+    color: white;
+    text-decoration: none;
+}
+.container a:hover{
+    color: rgb(220,220,0);
+}
